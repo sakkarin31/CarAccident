@@ -1,12 +1,17 @@
 import pandas as pd
 
-df = pd.read_csv("Alldataaccident_fixed.csv")
+# โหลดไฟล์ที่จัดเรียงแล้ว
+df = pd.read_csv("Alldataaccident_with_ranges.csv")
 
-# ลบคอลัมน์เดียว
-df = df.drop(columns=["Unnamed: 39"])
+# สร้างคอลัมน์ใหม่
+df["รถน้อยกว่า4ล้อ"] = df[["รถจักรยานยนต์", "รถสามล้อเครื่อง"]].sum(axis=1)
 
-# ลบหลายคอลัมน์
-df = df.drop(columns=["วันที่รายงาน","เวลาที่รายงาน","ACC_CODE","หน่วยงาน","สายทาง","KM" ])
+df["รถ4ล้อ"] = df[["รถยนต์นั่งส่วนบุคคล", "รถตู้", "รถปิคอัพโดยสาร", "รถปิคอัพบรรทุก4ล้อ"]].sum(axis=1)
 
-# บันทึกกลับ
-df.to_csv("Alldataaccident_clean.csv", index=False, encoding="utf-8-sig")
+df["รถมากกว่า4ล้อ"] = df[[
+    "รถโดยสารมากกว่า4ล้อ", "รถบรรทุก6ล้อ", "รถบรรทุกไม่เกิน10ล้อ",
+    "รถบรรทุกมากกว่า10ล้อ", "รถอีแต๋น", "รถอื่นๆ"
+]].sum(axis=1)
+
+# บันทึกไฟล์ใหม่
+df.to_csv("Alldataaccident_with_car_groups.csv", index=False, encoding="utf-8-sig")
