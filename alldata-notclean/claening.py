@@ -6,7 +6,7 @@ df = pd.read_csv("Alldataaccident.csv")
 df["วันเวลาเกิด"] = pd.to_datetime(
     df["วันที่เกิดเหตุ"].astype(str).str.strip() + " " + df["เวลา"].astype(str).str.strip(),
     errors="coerce",
-    dayfirst=True   # 👈 บังคับให้อ่านแบบ d/m/yyyy
+    dayfirst=True   #บังคับให้อ่านแบบ d/m/yyyy
 )
 
 # บันทึกกลับ
