@@ -1,13 +1,12 @@
 import pandas as pd
 
-df = pd.read_csv("Alldataaccident.csv")
+df = pd.read_csv("Alldataaccident_fixed.csv")
 
-# รวมคอลัมน์วันที่ + เวลา
-df["วันเวลาเกิด"] = pd.to_datetime(
-    df["วันที่เกิดเหตุ"].astype(str).str.strip() + " " + df["เวลา"].astype(str).str.strip(),
-    errors="coerce",
-    dayfirst=True   #บังคับให้อ่านแบบ d/m/yyyy
-)
+# ลบคอลัมน์เดียว
+df = df.drop(columns=["Unnamed: 39"])
+
+# ลบหลายคอลัมน์
+df = df.drop(columns=["วันที่รายงาน","เวลาที่รายงาน","ACC_CODE","หน่วยงาน","สายทาง","KM" ])
 
 # บันทึกกลับ
-df.to_csv("Alldataaccident_fixed2.csv", index=False, encoding="utf-8-sig")
+df.to_csv("Alldataaccident_clean.csv", index=False, encoding="utf-8-sig")
