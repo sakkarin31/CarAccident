@@ -1,0 +1,7 @@
+LSTM Model Performance
+==============================
+MAE: 0.0081
+R²: -0.0808
+Sequence Length: 24
+Hidden Size: 64
+Epochs: 50
