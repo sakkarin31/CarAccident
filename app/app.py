@@ -206,12 +206,17 @@ with tab2:
 
         monthly_counts = road4.groupby("month").size()
 
+        month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        
+    
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.plot(monthly_counts.index, monthly_counts.values, marker="o", linestyle="-")
         ax.set_xlabel("Month")
         ax.set_ylabel("Number of Accidents")
         ax.set_title("Monthly Accidents on Road 4 (2024)")
         ax.set_xticks(range(1, 13))
+        ax.set_xticklabels(month_names)
         st.pyplot(fig)
 
 
@@ -231,11 +236,20 @@ with tab2:
             }
             vehicle_counts.index = vehicle_counts.index.map(lambda x: rename_map.get(x, x))
 
-            # วาด Histogram
-            fig, ax = plt.subplots(figsize=(8,4))
-            vehicle_counts.plot(kind="bar", ax=ax, color="tab:purple")
+            # วาด Histogram พร้อมหลายสี
+            fig, ax = plt.subplots(figsize=(8, 4))
+
+            colors = ["tab:blue", "tab:orange", "tab:green"]  # สีต่างกันแต่ละแท่ง
+            bars = ax.bar(vehicle_counts.index, vehicle_counts.values, color=colors[:len(vehicle_counts)], label=vehicle_counts.index)
+
             ax.set_title("Number of Vehicles by Type (2024)")
             ax.set_ylabel("Number of Vehicles")
+
+            # เพิ่ม legend ด้านขวาบน
+            ax.legend(title="Vehicle Type", loc="upper right")
+
             st.pyplot(fig)
         else:
             st.warning("Vehicle-type columns not found in accident2024.csv")
+
+
