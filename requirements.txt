@@ -6,3 +6,5 @@ matplotlib
 statsmodels
 torch
 tensorboard
+selenium
+webdriver-manager
