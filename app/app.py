@@ -196,31 +196,29 @@ with tab2:
 
     # -------- Road 4 Monthly Accidents --------
     with sub_tab3:
+        st.header("🚗 Total Vehicles Involved in Accidents on Road 4 (by Month)")
+
         # โหลดข้อมูล
         accident_df = pd.read_csv("dataset/accident2024.csv")
-        accident_df["วันที่เกิดเหตุ"] = pd.to_datetime(accident_df["วันที่เกิดเหตุ"], errors="coerce")
+        accident_df["วันที่เกิดเหตุ"] = pd.to_datetime(accident_df["วันที่เกิดเหตุ"], errors="coerce", dayfirst=True)
         accident_df["month"] = accident_df["วันที่เกิดเหตุ"].dt.month
 
         # กรองเฉพาะสายทาง 4
         road4 = accident_df[accident_df["รหัสสายทาง"] == 4]
 
-        # รวมจำนวนรถทุกประเภทที่เกิดเหตุในแต่ละเดือน
-        road4["total_vehicles"] = (
-            road4["รถน้อยกว่า4ล้อ"] + road4["รถ4ล้อ"] + road4["รถมากกว่า4ล้อ"]
-        )
-        monthly_counts = road4.groupby("month")["total_vehicles"].sum()
+        # ✅ รวมจำนวน "รถที่เกิดเหตุ" ตามเดือน แล้ว reset_index() เพื่อให้เป็น DataFrame
+        monthly_counts = road4.groupby("month")["รถที่เกิดเหตุ"].sum().reset_index()
 
-        # ชื่อเดือน
+        # เตรียมชื่อเดือน
         month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-        # plot line chart
+        # วาดกราฟแท่ง
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(monthly_counts.index, monthly_counts.values,
-                marker="o", linestyle="-", color="royalblue")
+        ax.plot(monthly_counts["month"], monthly_counts["รถที่เกิดเหตุ"], color="tab:blue")
 
         ax.set_xlabel("Month")
-        ax.set_ylabel("Number of Vehicles in Accidents")
+        ax.set_ylabel("Total Vehicles Involved")
         ax.set_title("Monthly Vehicles Involved in Accidents on Road 4 (2024)")
         ax.set_xticks(range(1, 13))
         ax.set_xticklabels(month_names)
