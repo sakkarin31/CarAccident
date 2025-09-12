@@ -38,7 +38,7 @@ edges = get_roads()
 # ------------------- ฟังก์ชันสุ่มความเสี่ยง -------------------
 def predict_risk(road_id):
     np.random.seed(int(road_id))
-    return np.random.uniform(10, 80)
+    return np.random.uniform(1, 10)
 
 # ------------------- GeoDataFrame -> PathLayer -------------------
 def gdf_to_paths(gdf, color, width):
@@ -196,8 +196,6 @@ with tab2:
 
     # -------- Road 4 Monthly Accidents --------
     with sub_tab3:
-        st.header("🚗 Number of Accidents on Road 4 (by Month)")
-
         # โหลดข้อมูล
         accident_df = pd.read_csv("dataset/accident2024.csv")
         accident_df["วันที่เกิดเหตุ"] = pd.to_datetime(accident_df["วันที่เกิดเหตุ"], errors="coerce")
@@ -206,35 +204,46 @@ with tab2:
         # กรองเฉพาะสายทาง 4
         road4 = accident_df[accident_df["รหัสสายทาง"] == 4]
 
-        monthly_counts = road4.groupby("month").size()
+        # รวมจำนวนรถทุกประเภทที่เกิดเหตุในแต่ละเดือน
+        road4["total_vehicles"] = (
+            road4["รถน้อยกว่า4ล้อ"] + road4["รถ4ล้อ"] + road4["รถมากกว่า4ล้อ"]
+        )
+        monthly_counts = road4.groupby("month")["total_vehicles"].sum()
 
+        # ชื่อเดือน
         month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        
-    
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+        # plot line chart
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(monthly_counts.index, monthly_counts.values, marker="o", linestyle="-")
+        ax.plot(monthly_counts.index, monthly_counts.values,
+                marker="o", linestyle="-", color="royalblue")
+
         ax.set_xlabel("Month")
-        ax.set_ylabel("Number of Accidents")
-        ax.set_title("Monthly Accidents on Road 4 (2024)")
+        ax.set_ylabel("Number of Vehicles in Accidents")
+        ax.set_title("Monthly Vehicles Involved in Accidents on Road 4 (2024)")
         ax.set_xticks(range(1, 13))
         ax.set_xticklabels(month_names)
-        st.pyplot(fig)
 
+        st.pyplot(fig)
 
     with sub_tab4:
         st.header("🚗 Number of Vehicle-type on Road 4 (by Year)")
         # คำนวณจำนวนรถแต่ละประเภทตลอดปี
-        vehicle_cols = ["รถน้อยกว่า4ล้อ", "รถ4ล้อ", "รถมากกว่า4ล้อ"]
-        existing_cols = [c for c in vehicle_cols if c in accident_df.columns]
+        num_car_df = pd.read_csv("dataset/acc_weather-final.csv")
+        num_car_df["date"] = pd.to_datetime(num_car_df["date"], errors="coerce")
+        num_car_df["month"] = num_car_df["date"].dt.month
+
+        vehicle_cols = ["รถน้อยกว่า4ล้อทั้งหมด", "รถ4ล้อทั้งหมด", "รถมากกว่า4ล้อทั้งหมด"]
+        existing_cols = [c for c in vehicle_cols if c in num_car_df.columns]
 
         if existing_cols:
-            vehicle_counts = accident_df[existing_cols].sum()
+            vehicle_counts = num_car_df[existing_cols].sum()
             # เปลี่ยนชื่อคอลัมน์เป็นอังกฤษ
             rename_map = {
-                "รถน้อยกว่า4ล้อ": "Less than 4 wheels",
-                "รถ4ล้อ": "4 wheels",
-                "รถมากกว่า4ล้อ": "More than 4 wheels"
+                "รถน้อยกว่า4ล้อทั้งหมด": "Less than 4 wheels",
+                "รถ4ล้อทั้งหมด": "4 wheels",
+                "รถมากกว่า4ล้อทั้งหมด": "More than 4 wheels"
             }
             vehicle_counts.index = vehicle_counts.index.map(lambda x: rename_map.get(x, x))
 
