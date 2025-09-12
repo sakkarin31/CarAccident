@@ -225,40 +225,53 @@ with tab2:
 
         st.pyplot(fig)
 
-    with sub_tab4:
-        st.header("🚗 Number of Vehicle-type on Road 4 (by Year)")
-        # คำนวณจำนวนรถแต่ละประเภทตลอดปี
-        num_car_df = pd.read_csv("dataset/acc_weather-final.csv")
-        num_car_df["date"] = pd.to_datetime(num_car_df["date"], errors="coerce")
-        num_car_df["month"] = num_car_df["date"].dt.month
+with sub_tab4:
+    st.header("🚗 Number of Vehicle-type on Road 4 (by Month/Year)")
 
-        vehicle_cols = ["รถน้อยกว่า4ล้อทั้งหมด", "รถ4ล้อทั้งหมด", "รถมากกว่า4ล้อทั้งหมด"]
-        existing_cols = [c for c in vehicle_cols if c in num_car_df.columns]
+    # โหลดข้อมูล
+    num_car_df = pd.read_csv("dataset/acc_weather-final.csv")
+    num_car_df["date"] = pd.to_datetime(num_car_df["date"], errors="coerce")
+    num_car_df["month"] = num_car_df["date"].dt.month
 
-        if existing_cols:
-            vehicle_counts = num_car_df[existing_cols].sum()
-            # เปลี่ยนชื่อคอลัมน์เป็นอังกฤษ
-            rename_map = {
-                "รถน้อยกว่า4ล้อทั้งหมด": "Less than 4 wheels",
-                "รถ4ล้อทั้งหมด": "4 wheels",
-                "รถมากกว่า4ล้อทั้งหมด": "More than 4 wheels"
-            }
-            vehicle_counts.index = vehicle_counts.index.map(lambda x: rename_map.get(x, x))
+    vehicle_cols = ["รถน้อยกว่า4ล้อทั้งหมด", "รถ4ล้อทั้งหมด", "รถมากกว่า4ล้อทั้งหมด"]
+    existing_cols = [c for c in vehicle_cols if c in num_car_df.columns]
 
-            # วาด Histogram พร้อมหลายสี
-            fig, ax = plt.subplots(figsize=(8, 4))
+    if existing_cols:
+        # ---------------- Select Month ----------------
+        month_names = ["All"] + ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        selected_month = st.selectbox("Select Month", month_names)
 
-            colors = ["tab:blue", "tab:orange", "tab:green"]  # สีต่างกันแต่ละแท่ง
-            bars = ax.bar(vehicle_counts.index, vehicle_counts.values, color=colors[:len(vehicle_counts)], label=vehicle_counts.index)
-
-            ax.set_title("Number of Vehicles by Type (2024)")
-            ax.set_ylabel("Number of Vehicles")
-
-            # เพิ่ม legend ด้านขวาบน
-            ax.legend(title="Vehicle Type", loc="upper right")
-
-            st.pyplot(fig)
+        if selected_month != "All":
+            month_idx = month_names.index(selected_month)
+            filtered_df = num_car_df[num_car_df["month"] == month_idx]
         else:
-            st.warning("Vehicle-type columns not found in accident2024.csv")
+            filtered_df = num_car_df.copy()
+
+        # รวมจำนวนรถแต่ละประเภท
+        vehicle_counts = filtered_df[existing_cols].sum()
+
+        # เปลี่ยนชื่อคอลัมน์เป็นอังกฤษ
+        rename_map = {
+            "รถน้อยกว่า4ล้อทั้งหมด": "Less than 4 wheels",
+            "รถ4ล้อทั้งหมด": "4 wheels",
+            "รถมากกว่า4ล้อทั้งหมด": "More than 4 wheels"
+        }
+        vehicle_counts.index = vehicle_counts.index.map(lambda x: rename_map.get(x, x))
+
+
+        # วาด Histogram
+        fig, ax = plt.subplots(figsize=(8, 4))
+        colors = ["tab:blue", "tab:orange", "tab:green"]
+        ax.bar(vehicle_counts.index, vehicle_counts.values, color=colors[:len(vehicle_counts)])
+        ax.set_title(f"Number of Vehicles by Type ({selected_month} 2024)")
+        ax.set_ylabel("Number of Vehicles")
+        ax.set_xlabel("Vehicle Type")
+        ax.set_xticks(range(len(vehicle_counts.index)))
+        ax.set_xticklabels(vehicle_counts.index, rotation=0)
+        st.pyplot(fig)
+    else:
+        st.warning("Vehicle-type columns not found in accident2024.csv")
+
 
 
