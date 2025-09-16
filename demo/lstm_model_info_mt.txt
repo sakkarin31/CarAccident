@@ -1,0 +1,8 @@
+Multi-task LSTM Performance
+==============================
+CLS PR-AUC: 0.0043
+REG MAE avg: 0.0037
+REG MAE per-col: [0.005185084417462349, 0.0032507164869457483, 0.002664409577846527]
+Sequence Length: 24
+Hidden Size: 128
+Epochs: 30
