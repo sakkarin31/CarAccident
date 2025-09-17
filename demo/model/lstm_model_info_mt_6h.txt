@@ -1,9 +1,9 @@
 Multi-task LSTM (6H) Performance
 ========================================
-Val PR-AUC (best): 0.0441
-Test PR-AUC: 0.0354
-Thr*: 0.064935 | P@thr(Test)=0.0000 | R@thr(Test)=0.0000 | Alerts=0.1050
-REG Test MAE avg: 0.019057 | per-col: [0.00952993705868721, 0.03185003250837326, 0.0157919954508543]
+Val PR-AUC (best): 0.0442
+Test PR-AUC: 0.0360
+Thr*: 0.064935 | P@thr(Test)=0.0000 | R@thr(Test)=0.0000 | Alerts=0.1187
+REG Test MAE avg: 0.025146 | per-col: [0.008561750873923302, 0.030096285045146942, 0.03677934408187866]
 Window: 6H, SeqLen: 8
 Hidden: 128, Layers: 2, Dropout: 0.2
 Epochs: 9
