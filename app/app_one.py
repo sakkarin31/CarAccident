@@ -9,6 +9,36 @@ from shapely.geometry import Point, LineString
 import numpy as np
 import pandas as pd
 import matplotlib.colors as mcolors
+import os
+
+# ---------------------------
+# โหลดข้อมูลจากไฟล์ GeoJSON ที่มีอยู่ (ไม่ดึงจาก OSM)
+# ---------------------------
+def load_from_geojson(data_dir="data", buffer_m=1000):
+    path_edges = os.path.join(data_dir, "edges_all.geojson")
+    path_edges4 = os.path.join(data_dir, "edges_highway4.geojson")
+    path_buffer = os.path.join(data_dir, f"buffer_{buffer_m}m.geojson")
+
+    # ตรวจสอบว่าไฟล์ครบหรือไม่
+    missing = [p for p in [path_edges, path_edges4, path_buffer] if not os.path.exists(p)]
+    if missing:
+        st.error("❌ ไม่พบไฟล์ GeoJSON ครบชุด กรุณาใส่ไฟล์ในโฟลเดอร์ 'data/'")
+        st.stop()
+
+    # โหลดข้อมูลจากไฟล์ GeoJSON
+    edges = gpd.read_file(path_edges)
+    edges_4 = gpd.read_file(path_edges4)
+    buffer_gdf = gpd.read_file(path_buffer)
+
+    # ตรวจสอบ CRS
+    if edges.crs is None:
+        edges.set_crs(epsg=4326, inplace=True)
+    if edges_4.crs is None:
+        edges_4.set_crs(epsg=4326, inplace=True)
+    if buffer_gdf.crs is None:
+        buffer_gdf.set_crs(epsg=4326, inplace=True)
+
+    return edges, edges_4, buffer_gdf
 
 # ---------------------------
 # โหลดเฉพาะถนนทางหลวงหมายเลข 4
@@ -172,10 +202,12 @@ def draw_route_colored(m, gdf):
 st.set_page_config(page_title="🚗 Highway 4 (Songkhla)", layout="wide")
 st.title("🚗 วิเคราะห์ความเสี่ยงบนทางหลวงหมายเลข 4 (Songkhla)")
 
-G, edges = load_highway4_graph()
+# โหลดข้อมูลจากไฟล์ GeoJSON
+edges, edges_4, buffer_gdf = load_from_geojson(buffer_m=1000)
+buffer_geom = buffer_gdf.iloc[0] if buffer_gdf is not None else None
 
-if G is None or edges is None or edges.empty:
-    st.error("ไม่สามารถโหลดข้อมูลทางหลวงหมายเลข 4 ได้")
+if edges is None or edges.empty or buffer_geom is None:
+    st.error("❌ ไม่สามารถโหลดข้อมูลถนนหรือ buffer ได้")
 else:
     if "points" not in st.session_state:
         st.session_state["points"] = []
@@ -185,18 +217,28 @@ else:
     with col_map:
         m = folium.Map(location=[7.1, 100.6], zoom_start=11)
 
-        # ✅ วาด buffer รอบถนนสาย 4
-        buffer_geom = draw_highway4_buffer_only(m, edges, buffer_m=2000, simplify_tol=50)
+        # ✅ แสดงขอบเขต buffer รอบสาย 4
+        folium.GeoJson(
+            buffer_gdf,
+            name="Highway 4 Buffer",
+            style_function=lambda x: {
+                "color": "blue",
+                "weight": 2,
+                "fillColor": "lightblue",
+                "fillOpacity": 0.2,
+            },
+        ).add_to(m)
 
-        # ✅ วาดเส้นถนนสาย 4
-        if not edges.empty:
+        # ✅ วาดถนนทั้งหมด (ภายใน buffer)
+        edges_in_buffer = edges[edges.intersects(buffer_geom)]
+        if not edges_in_buffer.empty:
             folium.GeoJson(
-                edges,
+                edges_in_buffer,
                 style_function=lambda x: {"color": "gray", "weight": 2},
-                name="Highway 4"
+                name="Roads in Buffer"
             ).add_to(m)
 
-        # ✅ แสดงหมุด
+        # ✅ แสดงหมุดที่ผู้ใช้ปักแล้ว
         marker_cluster = MarkerCluster().add_to(m)
         for i, p in enumerate(st.session_state["points"]):
             folium.Marker(
@@ -205,53 +247,33 @@ else:
                 tooltip=f"Point {i+1}"
             ).add_to(marker_cluster)
 
-        # ✅ ถ้ามี 2 จุดขึ้นไป คำนวณเส้นทาง
-        route_gdf = gpd.GeoDataFrame()
-        if len(st.session_state["points"]) >= 2:
-            nodes = [ox.distance.nearest_nodes(G, p["lng"], p["lat"]) for p in st.session_state["points"]]
-            G_simple = simplify_graph(G)
-            full_nodes = []
-            for i in range(len(nodes) - 1):
-                try:
-                    sub_path = nx.shortest_path(G_simple, nodes[i], nodes[i+1], weight="length")
-                except nx.NetworkXNoPath:
-                    st.warning(f"🚫 No path between Point {i+1} and Point {i+2}")
-                    continue
-                if i == 0:
-                    full_nodes.extend(sub_path)
-                else:
-                    full_nodes.extend(sub_path[1:])
-            route_gdf = route_to_gdf(G, full_nodes)
-            draw_route_colored(m, route_gdf)
-
+        # ✅ ตรวจสอบการคลิกแผนที่
         out = st_folium(m, width=900, height=600, key="main_map")
 
     with col_ctrl:
         st.subheader("⚙️ Controls")
-        if st.button("🗑 Clear Points"):
+
+        if st.button("🗑 ล้างหมุดทั้งหมด"):
             st.session_state["points"] = []
             st.rerun()
 
+        # ✅ เมื่อคลิกบนแผนที่
         if out and out.get("last_clicked"):
             raw = out["last_clicked"]
             lat, lon = raw["lat"], raw["lng"]
-            if buffer_geom is not None and Point(lon, lat).within(buffer_geom):
-                node = ox.distance.nearest_nodes(G, lon, lat)
-                snapped = {"lat": float(G.nodes[node]["y"]), "lng": float(G.nodes[node]["x"])}
-                if snapped not in st.session_state["points"]:
-                    st.session_state["points"].append(snapped)
+
+            # ตรวจสอบว่าจุดอยู่ใน buffer หรือไม่
+            if Point(lon, lat).within(buffer_geom):
+                new_point = {"lat": lat, "lng": lon}
+                if new_point not in st.session_state["points"]:
+                    st.session_state["points"].append(new_point)
                     st.rerun()
             else:
-                st.warning("⚠️ กรุณาปักหมุดภายในพื้นที่รอบถนนสาย 4 เท่านั้น")
+                st.warning("⚠️ กรุณาปักหมุดภายในพื้นที่ buffer รอบถนนสาย 4 เท่านั้น")
 
+        # ✅ แสดงข้อมูลหมุดที่ปักแล้ว
         if st.session_state["points"]:
-            st.markdown("**📍 Selected Points:**")
+            st.markdown("**📍 หมุดที่เลือก:**")
             df_points = pd.DataFrame(st.session_state["points"])
             df_points.index = [f"Point {i+1}" for i in range(len(df_points))]
             st.dataframe(df_points)
-
-        if not route_gdf.empty:
-            total_len = get_route_length_meters(route_gdf)
-            avg_risk = calc_weighted_risk(route_gdf)
-            st.metric("📏 Route Length (m)", f"{total_len:.0f}")
-            st.metric("⚠️ Predicted Risk", f"{avg_risk:.2f}")
