@@ -16,35 +16,54 @@ import matplotlib.colors as mcolors
 @st.cache_data
 def load_highway4_graph():
     try:
-        custom_filter = '["highway"~"motorway|trunk|primary"]["ref"="4"]'
+        # 🔹 โหลดถนนหลักทั้งหมดในสงขลา
         G = ox.graph_from_place(
-            "Songkhla, Thailand",
+            "Songkhla Province, Thailand",
             network_type="drive",
             simplify=True,
-            custom_filter=custom_filter
+            custom_filter='["highway"~"motorway|trunk|primary"]'
         )
-        return G
+
+        # 🔹 แปลงเป็น GeoDataFrame
+        edges = ox.graph_to_gdfs(G, nodes=False, edges=True)
+        if edges.empty:
+            st.warning("⚠️ ไม่มีข้อมูลถนนในพื้นที่นี้")
+            return None, None
+
+        # 🔹 กรองเฉพาะถนนที่ ref = 4 เป๊ะ ๆ เท่านั้น
+        edges["ref"] = edges["ref"].astype(str)
+        edges_4 = edges[edges["ref"].str.contains(r"(^|;)4($|;)", na=False)].copy()
+
+        # ถ้ายังไม่มีข้อมูล ลองเช็กชื่อถนนเผื่อบางช่วงไม่ได้ใส่ ref
+        if edges_4.empty:
+            edges["name"] = edges["name"].astype(str)
+            edges_4 = edges[edges["name"].str.contains("เพชรเกษม", na=False)].copy()
+
+        if edges_4.empty:
+            st.warning("⚠️ ไม่พบถนนทางหลวงหมายเลข 4 ใน Songkhla")
+            return G, None
+
+        edges_4 = edges_4.to_crs(epsg=4326)
+        return G, edges_4
+
     except Exception as e:
         st.error(f"❌ โหลดกราฟไม่สำเร็จ: {e}")
-        return None
+        return None, None
 
+    
 # ---------------------------
 # ฟังก์ชันวาด buffer รอบสาย 4
 # ---------------------------
-def draw_highway4_buffer_only(m, G, buffer_m=1000, simplify_tol=50):
+def draw_highway4_buffer_only(m, edges_4, buffer_m=1000, simplify_tol=50):
     try:
-        if G is None:
+        if edges_4 is None or edges_4.empty:
+            st.warning("⚠️ ไม่มีข้อมูลถนนสาย 4 สำหรับสร้าง buffer")
             return None
 
-        edges = ox.graph_to_gdfs(G, nodes=False, edges=True)
-        if edges.empty:
-            st.warning("⚠️ ไม่มีข้อมูลถนนสาย 4 ในพื้นที่นี้")
-            return None
+        if edges_4.crs is None:
+            edges_4 = edges_4.set_crs(epsg=4326)
 
-        if edges.crs is None:
-            edges = edges.set_crs(epsg=4326)
-
-        gdf_proj = edges.to_crs(epsg=3857)
+        gdf_proj = edges_4.to_crs(epsg=3857)
         buffer_union = gdf_proj.buffer(buffer_m).unary_union
         buffer_simplified = gpd.GeoSeries([buffer_union], crs="EPSG:3857").simplify(simplify_tol)
         buffer_wgs = buffer_simplified.to_crs(epsg=4326)
@@ -58,7 +77,6 @@ def draw_highway4_buffer_only(m, G, buffer_m=1000, simplify_tol=50):
                 "fillColor": "lightblue",
                 "fillOpacity": 0.2,
             },
-            tooltip=f"พื้นที่รอบถนนสาย 4 (±{buffer_m} m)"
         ).add_to(m)
 
         return buffer_wgs.iloc[0]
@@ -119,7 +137,7 @@ def calc_weighted_risk(route_gdf):
         if isinstance(hw_type, list):
             hw_type = hw_type[0] if hw_type else ""
         seg_len = row.geometry.length
-        if hw_type in {"motorway", "trunk", "primary"}:
+        if hw_type in {"trunk", "primary"}:
             ref = row.get("ref", "unknown")
             risk = predict_risk(ref)
             risk_sum += risk * seg_len
@@ -154,13 +172,11 @@ def draw_route_colored(m, gdf):
 st.set_page_config(page_title="🚗 Highway 4 (Songkhla)", layout="wide")
 st.title("🚗 วิเคราะห์ความเสี่ยงบนทางหลวงหมายเลข 4 (Songkhla)")
 
-G = load_highway4_graph()
+G, edges = load_highway4_graph()
 
-if G is None:
+if G is None or edges is None or edges.empty:
     st.error("ไม่สามารถโหลดข้อมูลทางหลวงหมายเลข 4 ได้")
 else:
-    edges = ox.graph_to_gdfs(G, nodes=False, edges=True).to_crs(epsg=4326)
-
     if "points" not in st.session_state:
         st.session_state["points"] = []
 
@@ -170,7 +186,7 @@ else:
         m = folium.Map(location=[7.1, 100.6], zoom_start=11)
 
         # ✅ วาด buffer รอบถนนสาย 4
-        buffer_geom = draw_highway4_buffer_only(m, G, buffer_m=1000, simplify_tol=50)
+        buffer_geom = draw_highway4_buffer_only(m, edges, buffer_m=2000, simplify_tol=50)
 
         # ✅ วาดเส้นถนนสาย 4
         if not edges.empty:
