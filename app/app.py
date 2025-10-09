@@ -5,6 +5,7 @@ import networkx as nx
 import pandas as pd
 import numpy as np
 import folium
+import matplotlib.colors as mcolors
 from folium.plugins import MarkerCluster
 from shapely.ops import unary_union
 from streamlit_folium import st_folium
@@ -72,34 +73,38 @@ def get_route_length_meters(gdf):
     return gdf.length.sum()
 
 def predict_risk(ref):
-    return np.random.uniform(0, 100)
+    return np.random.uniform(0, 10)
 
 def draw_route_colored(m, gdf):
     if gdf is None or gdf.empty:
         return
+    
     for _, row in gdf.iterrows():
         geom = row.geometry
         if geom is None:
             continue
+
         hw_type = row.get("highway", "")
         if isinstance(hw_type, list):
             hw_type = hw_type[0] if hw_type else ""
 
-        if hw_type == "motorway":
-            color = "blue"
-        elif hw_type in {"trunk", "primary"}:
-            color = "red"
-        elif hw_type in {"secondary", "tertiary"}:
-            color = "orange"
+        if hw_type in {"motorway", "trunk", "primary"}:
+            ref = row.get("ref", "unknown")
+            risk = predict_risk(ref)  # 0–10
+
+            # แปลง risk -> สีแดงอ่อน -> แดงเข้ม
+            norm_risk = min(max(risk / 10, 0), 1)
+            rgba = mcolors.to_rgba("red", alpha=0.3 + 0.7 * norm_risk)
+            color = mcolors.to_hex(rgba)
         else:
-            color = "green"
+            color = "gray"
 
         lines = [geom] if geom.geom_type == "LineString" else list(geom)
         for line in lines:
             folium.PolyLine(
                 [(y, x) for x, y in line.coords],
-                color=color, weight=6, opacity=0.8,
-                popup=f"{hw_type or 'unknown'}"
+                color=color, weight=6, opacity=0.9,
+                popup=f"{hw_type or 'non-highway'}"
             ).add_to(m)
 
 # ✅ ฟังก์ชันคำนวณ % ทางหลวง (รวม buffer)
@@ -129,11 +134,52 @@ def calc_highway_ratio(route_gdf, highways, buffer_m=30):
     total_len = route_proj["len"].sum()
     return hw_len / total_len if total_len > 0 else 0.0
 
+def draw_boundary(m):
+    """วาดเส้นขอบเขต Hat Yai ด้วยสีแดง"""
+    try:
+        boundary = ox.geocode_to_gdf("Hat Yai, Songkhla, Thailand").to_crs(epsg=4326)
+        folium.GeoJson(
+            boundary,
+            style_function=lambda x: {
+                "color": "blue",
+                "weight": 1.5,
+                "fill": False  # ถ้าอยากให้มีสีโปร่งใส เปลี่ยนเป็น True + ใส่ fillColor
+            },
+            name="Hat Yai Boundary"
+        ).add_to(m)
+    except Exception as e:
+        print(f"❌ ไม่สามารถโหลดขอบเขต Hat Yai: {e}")
+
+def calc_weighted_risk(route_gdf):
+    """คำนวณ risk แบบถ่วงน้ำหนักตามความยาว segment"""
+    if route_gdf.empty:
+        return 0.0
+
+    gdf_proj = route_gdf.to_crs(epsg=3857)
+    total_len = gdf_proj.length.sum()
+    if total_len == 0:
+        return 0.0
+
+    risk_sum = 0.0
+    for idx, row in gdf_proj.iterrows():
+        hw_type = row.get("highway", "")
+        if isinstance(hw_type, list):
+            hw_type = hw_type[0] if hw_type else ""
+
+        seg_len = row.geometry.length
+        if hw_type in {"motorway", "trunk", "primary"}:
+            ref = row.get("ref", "unknown")
+            risk = predict_risk(ref)  # 0–10
+            risk_sum += risk * seg_len
+        # ถนน non-highway ไม่นับ risk
+
+    return risk_sum / total_len
+
 # ---------------------------
 # UI
 # ---------------------------
 st.set_page_config(page_title="🚗 Accident Risk Map", layout="wide")
-st.title("🚗 Accident Risk Map (Hat Yai)")
+st.title("🚗 Highway Accident Risk (Hat Yai)")
 
 if "points" not in st.session_state:
     st.session_state["points"] = []
@@ -142,6 +188,7 @@ col_map, col_ctrl = st.columns([3, 1])
 
 with col_map:
     m = folium.Map(location=[7.01, 100.47], zoom_start=12)
+    draw_boundary(m)
 
     marker_cluster = MarkerCluster().add_to(m)
     for i, p in enumerate(st.session_state["points"]):
@@ -231,7 +278,7 @@ with col_ctrl:
         refs = [r for r in risk_refs.get("ref", []) if pd.notna(r)] if not risk_refs.empty else []
         risks = [predict_risk(r) for r in refs] if refs else [0]
         avg_risk = np.mean(risks)
-        overall_risk = avg_risk * prop_hw
+        overall_risk = calc_weighted_risk(route_gdf)
 
         st.metric("📏 Route length (m)", f"{total_len:.0f}")
         st.metric("🛣 % Highway", f"{prop_hw*100:.1f}%")

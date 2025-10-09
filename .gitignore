@@ -2,3 +2,4 @@ venv/
 cache
 songkhla_roads.geojson
 app/test_app.py
+app/requirements.txt
