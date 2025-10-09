@@ -1,0 +1,49 @@
+[2025-09-19T13:57:09.758+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-09-19T13:57:09.787+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: timeseries_pipeline.forecast_7days manual__2025-09-19T13:57:01.683273+00:00 [queued]>
+[2025-09-19T13:57:09.798+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: timeseries_pipeline.forecast_7days manual__2025-09-19T13:57:01.683273+00:00 [queued]>
+[2025-09-19T13:57:09.799+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 1
+[2025-09-19T13:57:09.819+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): forecast_7days> on 2025-09-19 13:57:01.683273+00:00
+[2025-09-19T13:57:09.833+0000] {logging_mixin.py:188} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61 DeprecationWarning: This process (pid=560) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2025-09-19T13:57:09.833+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'timeseries_pipeline', 'forecast_7days', 'manual__2025-09-19T13:57:01.683273+00:00', '--job-id', '56', '--raw', '--subdir', 'DAGS_FOLDER/timeseries_pipeline.py', '--cfg-path', '/tmp/tmpojv7sonj']
+[2025-09-19T13:57:09.836+0000] {standard_task_runner.py:63} INFO - Started process 563 to run task
+[2025-09-19T13:57:09.836+0000] {standard_task_runner.py:91} INFO - Job 56: Subtask forecast_7days
+[2025-09-19T13:57:09.884+0000] {task_command.py:426} INFO - Running <TaskInstance: timeseries_pipeline.forecast_7days manual__2025-09-19T13:57:01.683273+00:00 [running]> on host 0e2ba368a558
+[2025-09-19T13:57:09.959+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='timeseries_pipeline' AIRFLOW_CTX_TASK_ID='forecast_7days' AIRFLOW_CTX_EXECUTION_DATE='2025-09-19T13:57:01.683273+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-09-19T13:57:01.683273+00:00'
+[2025-09-19T13:57:09.961+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-09-19T13:57:09.981+0000] {logging_mixin.py:188} INFO - 📈 Starting Prophet forecast ...
+[2025-09-19T13:57:10.071+0000] {logging_mixin.py:188} INFO - 📊 Data received for forecast:
+[2025-09-19T13:57:10.078+0000] {logging_mixin.py:188} INFO -           ds       y
+0 2007-02-07  525000
+1 2007-02-27  290000
+2 2007-03-07  328000
+3 2007-03-09  380000
+4 2007-03-21  310000
+[2025-09-19T13:57:10.320+0000] {filesystem.py:118} DEBUG - input tempfile: /tmp/tmp5ef2r616/umr_sdcm.json
+[2025-09-19T13:57:12.624+0000] {filesystem.py:118} DEBUG - input tempfile: /tmp/tmp5ef2r616/yiv2m_e5.json
+[2025-09-19T13:57:12.627+0000] {model.py:2042} DEBUG - idx 0
+[2025-09-19T13:57:12.628+0000] {model.py:2043} DEBUG - running CmdStan, num_threads: None
+[2025-09-19T13:57:12.629+0000] {model.py:2055} DEBUG - CmdStan args: ['/home/***/.local/lib/python3.12/site-packages/prophet/stan_model/prophet_model.bin', 'random', 'seed=67092', 'data', 'file=/tmp/tmp5ef2r616/umr_sdcm.json', 'init=/tmp/tmp5ef2r616/yiv2m_e5.json', 'output', 'file=/tmp/tmp5ef2r616/prophet_modelifslk32a/prophet_model-20250919135712.csv', 'method=optimize', 'algorithm=lbfgs', 'iter=10000']
+[2025-09-19T13:57:12.630+0000] {logging_mixin.py:188} WARNING - 13:57:12 - cmdstanpy - INFO - Chain [1] start processing
+[2025-09-19T13:57:12.630+0000] {model.py:2058} INFO - Chain [1] start processing
+[2025-09-19T13:57:17.169+0000] {logging_mixin.py:188} WARNING - 13:57:17 - cmdstanpy - INFO - Chain [1] done processing
+[2025-09-19T13:57:17.168+0000] {model.py:2115} INFO - Chain [1] done processing
+[2025-09-19T13:57:17.812+0000] {logging_mixin.py:188} INFO - ✅ Forecasted values (last 10 rows):
+[2025-09-19T13:57:17.819+0000] {logging_mixin.py:188} INFO -              ds           yhat     yhat_lower    yhat_upper
+3579 2019-07-25  616535.759619  279967.287054  9.430049e+05
+3580 2019-07-26  619123.278795  260706.590377  9.717853e+05
+3581 2019-07-27  796602.051169  475168.737227  1.129919e+06
+3582 2019-07-28  747239.752750  371535.197730  1.095813e+06
+3583 2019-07-29  618229.950866  251650.636190  9.254466e+05
+3584 2019-07-30  604810.900411  278826.897410  9.352246e+05
+3585 2019-07-31  614874.516009  276431.164623  9.743119e+05
+3586 2019-08-01  612765.813289  256268.342803  9.431971e+05
+3587 2019-08-02  613134.273145  297928.572291  9.363069e+05
+3588 2019-08-03  788550.747860  456531.494264  1.131939e+06
+[2025-09-19T13:57:17.858+0000] {logging_mixin.py:188} INFO - 📁 Forecast CSV saved to /opt/***/data/processed/forecast.csv
+[2025-09-19T13:57:18.166+0000] {logging_mixin.py:188} INFO - 📊 Forecast plot saved to /opt/***/data/processed/forecast_plot.png
+[2025-09-19T13:57:18.175+0000] {python.py:237} INFO - Done. Returned value was: [{'ds': '2019-07-28', 'yhat': 747239.7527495552}, {'ds': '2019-07-29', 'yhat': 618229.9508657807}, {'ds': '2019-07-30', 'yhat': 604810.900411023}, {'ds': '2019-07-31', 'yhat': 614874.5160094884}, {'ds': '2019-08-01', 'yhat': 612765.8132893451}, {'ds': '2019-08-02', 'yhat': 613134.273145358}, {'ds': '2019-08-03', 'yhat': 788550.7478603381}]
+[2025-09-19T13:57:18.177+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-09-19T13:57:18.203+0000] {taskinstance.py:1206} INFO - Marking task as SUCCESS. dag_id=timeseries_pipeline, task_id=forecast_7days, run_id=manual__2025-09-19T13:57:01.683273+00:00, execution_date=20250919T135701, start_date=20250919T135709, end_date=20250919T135718
+[2025-09-19T13:57:18.260+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 0
+[2025-09-19T13:57:18.289+0000] {taskinstance.py:3503} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2025-09-19T13:57:18.295+0000] {local_task_job_runner.py:222} INFO - ::endgroup::
