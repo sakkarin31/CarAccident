@@ -1,5 +1,10 @@
+version: "3"
+
+# ------------------------------------------------------
+# 🧱 Common configuration for all Airflow services
+# ------------------------------------------------------
 x-airflow-common: &airflow-common
-  image: custom-airflow:latest   # ใช้ image เดียว
+  image: custom-airflow:latest           # ใช้ image ที่ build จาก Dockerfile เดียวกัน
   environment:
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -14,7 +19,11 @@ x-airflow-common: &airflow-common
     - ./data:/opt/airflow/data
   user: "${AIRFLOW_UID:-50000}:0"
 
+# ------------------------------------------------------
+# 🚀 Services
+# ------------------------------------------------------
 services:
+  # 🗄️ Database
   postgres:
     image: postgres:13
     environment:
@@ -24,13 +33,17 @@ services:
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
 
+  # 🧰 Initialize Airflow (run only once)
   airflow-init:
     <<: *airflow-common
-    build: .                     # ⭐ build image แค่ service เดียวนี้
-    command: bash -c "airflow db init && airflow users create --username admin --password admin --firstname admin --lastname user --role Admin --email admin@example.com"
+    build: .   # build image จาก Dockerfile ในโฟลเดอร์นี้ (airflow/)
+    command: >
+      bash -c "airflow db init &&
+               airflow users create --username admin --password admin --firstname admin --lastname user --role Admin --email admin@example.com"
     depends_on:
       - postgres
 
+  # 🌐 Airflow Web UI
   webserver:
     <<: *airflow-common
     command: webserver
@@ -39,11 +52,27 @@ services:
     depends_on:
       - postgres
 
+  # ⏱️ Scheduler
   scheduler:
     <<: *airflow-common
     command: scheduler
     depends_on:
       - postgres
 
+  # 🚦 Streamlit App
+  streamlit:
+    build:
+      context: ../app                # โฟลเดอร์ที่มี app_songkla.py
+    container_name: streamlit_app
+    ports:
+      - "8501:8501"                  # เปิดเว็บที่ http://localhost:8501
+    volumes:
+      - ../app:/app                  # sync โค้ดในเครื่องเข้าคอนเทนเนอร์
+    depends_on:
+      - postgres
+
+# ------------------------------------------------------
+# 💾 Volume สำหรับเก็บข้อมูลถาวร
+# ------------------------------------------------------
 volumes:
   postgres-db-volume:
