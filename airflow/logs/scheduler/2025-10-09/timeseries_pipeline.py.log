@@ -2397,3 +2397,65 @@
 [2025-10-09T14:37:07.270+0000] {logging_mixin.py:188} INFO - [2025-10-09T14:37:07.270+0000] {dag.py:3096} INFO - Sync 1 DAGs
 [2025-10-09T14:37:07.284+0000] {logging_mixin.py:188} INFO - [2025-10-09T14:37:07.284+0000] {dag.py:3954} INFO - Setting next_dagrun for timeseries_pipeline to 2025-10-08 00:00:00+00:00, run_after=2025-10-09 00:00:00+00:00
 [2025-10-09T14:37:07.300+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/timeseries_pipeline.py took 0.720 seconds
+[2025-10-09T15:04:34.182+0000] {processor.py:161} INFO - Started process (PID=172) to work on /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:04:34.183+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/timeseries_pipeline.py for tasks to queue
+[2025-10-09T15:04:34.185+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:04:34.184+0000] {dagbag.py:545} INFO - Filling up the DagBag from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:04:35.918+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:04:35.917+0000] {font_manager.py:1639} INFO - generated new fontManager
+[2025-10-09T15:04:36.192+0000] {processor.py:840} INFO - DAG(s) 'timeseries_pipeline' retrieved from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:04:36.306+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:04:36.305+0000] {override.py:1829} INFO - Created Permission View: can delete on DAG:timeseries_pipeline
+[2025-10-09T15:04:36.314+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:04:36.314+0000] {override.py:1829} INFO - Created Permission View: can read on DAG:timeseries_pipeline
+[2025-10-09T15:04:36.321+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:04:36.321+0000] {override.py:1829} INFO - Created Permission View: can edit on DAG:timeseries_pipeline
+[2025-10-09T15:04:36.322+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:04:36.321+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2025-10-09T15:04:36.329+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:04:36.329+0000] {dag.py:3118} INFO - Creating ORM DAG for timeseries_pipeline
+[2025-10-09T15:04:36.337+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:04:36.337+0000] {dag.py:3954} INFO - Setting next_dagrun for timeseries_pipeline to 2025-10-08 00:00:00+00:00, run_after=2025-10-09 00:00:00+00:00
+[2025-10-09T15:04:36.354+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/timeseries_pipeline.py took 2.183 seconds
+[2025-10-09T15:05:06.837+0000] {processor.py:161} INFO - Started process (PID=191) to work on /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:05:06.838+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/timeseries_pipeline.py for tasks to queue
+[2025-10-09T15:05:06.839+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:05:06.838+0000] {dagbag.py:545} INFO - Filling up the DagBag from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:05:07.606+0000] {processor.py:840} INFO - DAG(s) 'timeseries_pipeline' retrieved from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:05:07.624+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:05:07.624+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2025-10-09T15:05:07.639+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:05:07.639+0000] {dag.py:3954} INFO - Setting next_dagrun for timeseries_pipeline to 2025-10-08 00:00:00+00:00, run_after=2025-10-09 00:00:00+00:00
+[2025-10-09T15:05:07.659+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/timeseries_pipeline.py took 0.828 seconds
+[2025-10-09T15:05:38.058+0000] {processor.py:161} INFO - Started process (PID=203) to work on /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:05:38.059+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/timeseries_pipeline.py for tasks to queue
+[2025-10-09T15:05:38.060+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:05:38.060+0000] {dagbag.py:545} INFO - Filling up the DagBag from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:05:38.838+0000] {processor.py:840} INFO - DAG(s) 'timeseries_pipeline' retrieved from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:05:38.857+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:05:38.856+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2025-10-09T15:05:38.873+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:05:38.872+0000] {dag.py:3954} INFO - Setting next_dagrun for timeseries_pipeline to 2025-10-08 00:00:00+00:00, run_after=2025-10-09 00:00:00+00:00
+[2025-10-09T15:05:38.888+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/timeseries_pipeline.py took 0.834 seconds
+[2025-10-09T15:06:38.978+0000] {processor.py:161} INFO - Started process (PID=172) to work on /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:06:38.979+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/timeseries_pipeline.py for tasks to queue
+[2025-10-09T15:06:38.981+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:06:38.981+0000] {dagbag.py:545} INFO - Filling up the DagBag from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:06:40.761+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:06:40.760+0000] {font_manager.py:1639} INFO - generated new fontManager
+[2025-10-09T15:06:41.131+0000] {processor.py:840} INFO - DAG(s) 'timeseries_pipeline' retrieved from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:06:41.168+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:06:41.168+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2025-10-09T15:06:41.190+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:06:41.190+0000] {dag.py:3954} INFO - Setting next_dagrun for timeseries_pipeline to 2025-10-08 00:00:00+00:00, run_after=2025-10-09 00:00:00+00:00
+[2025-10-09T15:06:41.215+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/timeseries_pipeline.py took 2.254 seconds
+[2025-10-09T15:07:11.665+0000] {processor.py:161} INFO - Started process (PID=191) to work on /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:07:11.666+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/timeseries_pipeline.py for tasks to queue
+[2025-10-09T15:07:11.667+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:07:11.667+0000] {dagbag.py:545} INFO - Filling up the DagBag from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:07:12.615+0000] {processor.py:840} INFO - DAG(s) 'timeseries_pipeline' retrieved from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:07:12.690+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:07:12.690+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2025-10-09T15:07:12.707+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:07:12.706+0000] {dag.py:3954} INFO - Setting next_dagrun for timeseries_pipeline to 2025-10-08 00:00:00+00:00, run_after=2025-10-09 00:00:00+00:00
+[2025-10-09T15:07:12.729+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/timeseries_pipeline.py took 1.074 seconds
+[2025-10-09T15:07:43.114+0000] {processor.py:161} INFO - Started process (PID=203) to work on /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:07:43.114+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/timeseries_pipeline.py for tasks to queue
+[2025-10-09T15:07:43.115+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:07:43.115+0000] {dagbag.py:545} INFO - Filling up the DagBag from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:07:43.814+0000] {processor.py:840} INFO - DAG(s) 'timeseries_pipeline' retrieved from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:07:43.836+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:07:43.835+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2025-10-09T15:07:43.855+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:07:43.855+0000] {dag.py:3954} INFO - Setting next_dagrun for timeseries_pipeline to 2025-10-08 00:00:00+00:00, run_after=2025-10-09 00:00:00+00:00
+[2025-10-09T15:07:43.874+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/timeseries_pipeline.py took 0.765 seconds
+[2025-10-09T15:08:14.350+0000] {processor.py:161} INFO - Started process (PID=215) to work on /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:08:14.352+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/timeseries_pipeline.py for tasks to queue
+[2025-10-09T15:08:14.353+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:08:14.352+0000] {dagbag.py:545} INFO - Filling up the DagBag from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:08:15.153+0000] {processor.py:840} INFO - DAG(s) 'timeseries_pipeline' retrieved from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:08:15.174+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:08:15.173+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2025-10-09T15:08:15.189+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:08:15.189+0000] {dag.py:3954} INFO - Setting next_dagrun for timeseries_pipeline to 2025-10-08 00:00:00+00:00, run_after=2025-10-09 00:00:00+00:00
+[2025-10-09T15:08:15.209+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/timeseries_pipeline.py took 0.864 seconds
+[2025-10-09T15:08:45.481+0000] {processor.py:161} INFO - Started process (PID=227) to work on /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:08:45.482+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/timeseries_pipeline.py for tasks to queue
+[2025-10-09T15:08:45.483+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:08:45.483+0000] {dagbag.py:545} INFO - Filling up the DagBag from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:08:46.173+0000] {processor.py:840} INFO - DAG(s) 'timeseries_pipeline' retrieved from /opt/airflow/dags/timeseries_pipeline.py
+[2025-10-09T15:08:46.196+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:08:46.196+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2025-10-09T15:08:46.209+0000] {logging_mixin.py:188} INFO - [2025-10-09T15:08:46.209+0000] {dag.py:3954} INFO - Setting next_dagrun for timeseries_pipeline to 2025-10-08 00:00:00+00:00, run_after=2025-10-09 00:00:00+00:00
+[2025-10-09T15:08:46.223+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/timeseries_pipeline.py took 0.745 seconds

@@ -5137,3 +5137,36 @@ File Path                                           PID  Runtime      # DAGs    
 /opt/airflow/dags/etl_timeseries_csv_pipeline.py   3558  0.00s             1           0  0.14s           2025-10-09T14:36:20
 ================================================================================
 [2025-10-09T14:37:09.329+0000] {manager.py:452} INFO - Exiting gracefully upon receiving signal 15
+[2025-10-09T15:04:33.765+0000] {manager.py:470} INFO - Processing files using up to 2 processes at a time 
+[2025-10-09T15:04:33.767+0000] {manager.py:471} INFO - Process each file at most once every 30 seconds
+[2025-10-09T15:04:33.768+0000] {manager.py:472} INFO - Checking for new files in /opt/airflow/dags every 300 seconds
+[2025-10-09T15:04:33.770+0000] {manager.py:737} INFO - Searching for files in /opt/airflow/dags
+[2025-10-09T15:04:34.062+0000] {manager.py:740} INFO - There are 2 files in /opt/airflow/dags
+[2025-10-09T15:04:34.225+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                           PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  ----------
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py    175  0.07s             0           0
+/opt/airflow/dags/timeseries_pipeline.py            172  0.08s             0           0
+================================================================================
+[2025-10-09T15:05:06.822+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                           PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py            191  0.00s             1           0  2.23s           2025-10-09T15:04:36
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.12s           2025-10-09T15:05:04
+================================================================================
+[2025-10-09T15:05:39.152+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.86s           2025-10-09T15:05:38
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:05:35
+================================================================================
+[2025-10-09T15:05:52.322+0000] {manager.py:452} INFO - Exiting gracefully upon receiving signal 15
