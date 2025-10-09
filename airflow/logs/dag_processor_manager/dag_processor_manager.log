@@ -5220,3 +5220,205 @@ File Path                                         PID    Runtime      # DAGs    
 /opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.77s           2025-10-09T15:08:46
 /opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:08:41
 ================================================================================
+[2025-10-09T15:09:20.959+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.79s           2025-10-09T15:09:17
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.12s           2025-10-09T15:09:13
+================================================================================
+[2025-10-09T15:09:52.784+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.95s           2025-10-09T15:09:48
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.13s           2025-10-09T15:09:45
+================================================================================
+[2025-10-09T15:10:24.988+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.74s           2025-10-09T15:10:19
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:10:17
+================================================================================
+[2025-10-09T15:10:57.674+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.80s           2025-10-09T15:10:50
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:10:49
+================================================================================
+[2025-10-09T15:11:29.752+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.83s           2025-10-09T15:11:22
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.12s           2025-10-09T15:11:21
+================================================================================
+[2025-10-09T15:11:38.818+0000] {manager.py:737} INFO - Searching for files in /opt/airflow/dags
+[2025-10-09T15:11:38.897+0000] {manager.py:740} INFO - There are 2 files in /opt/airflow/dags
+[2025-10-09T15:12:01.772+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.74s           2025-10-09T15:11:54
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:11:54
+================================================================================
+[2025-10-09T15:12:34.145+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.77s           2025-10-09T15:12:26
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.12s           2025-10-09T15:12:25
+================================================================================
+[2025-10-09T15:13:06.369+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.83s           2025-10-09T15:12:58
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.12s           2025-10-09T15:12:57
+================================================================================
+[2025-10-09T15:13:38.693+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.82s           2025-10-09T15:13:30
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.12s           2025-10-09T15:13:29
+================================================================================
+[2025-10-09T15:14:10.834+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.79s           2025-10-09T15:14:02
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.12s           2025-10-09T15:14:02
+================================================================================
+[2025-10-09T15:14:43.361+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.69s           2025-10-09T15:14:34
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.10s           2025-10-09T15:14:34
+================================================================================
+[2025-10-09T15:15:15.994+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.73s           2025-10-09T15:15:06
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:15:06
+================================================================================
+[2025-10-09T15:15:49.088+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.72s           2025-10-09T15:15:39
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.10s           2025-10-09T15:15:39
+================================================================================
+[2025-10-09T15:16:21.796+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.68s           2025-10-09T15:16:11
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.10s           2025-10-09T15:16:11
+================================================================================
+[2025-10-09T15:16:38.929+0000] {manager.py:737} INFO - Searching for files in /opt/airflow/dags
+[2025-10-09T15:16:39.072+0000] {manager.py:740} INFO - There are 2 files in /opt/airflow/dags
+[2025-10-09T15:16:54.011+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.76s           2025-10-09T15:16:43
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:16:43
+================================================================================
+[2025-10-09T15:17:26.121+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.77s           2025-10-09T15:17:16
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.13s           2025-10-09T15:17:15
+================================================================================
+[2025-10-09T15:17:58.617+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.76s           2025-10-09T15:17:48
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:17:47
+================================================================================
+[2025-10-09T15:18:30.772+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.73s           2025-10-09T15:18:20
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:18:19
+================================================================================
+[2025-10-09T15:19:03.414+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.70s           2025-10-09T15:18:52
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.11s           2025-10-09T15:18:51
+================================================================================
+[2025-10-09T15:19:35.868+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.72s           2025-10-09T15:19:24
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  0.10s           2025-10-09T15:19:23
+================================================================================
+[2025-10-09T15:20:08.851+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  2.24s           2025-10-09T15:19:56
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  1.63s           2025-10-09T15:19:56
+================================================================================
+[2025-10-09T15:20:41.055+0000] {manager.py:878} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                         PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run
+------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/etl_timeseries_csv_pipeline.py                           1           0  1.63s           2025-10-09T15:20:28
+/opt/airflow/dags/timeseries_pipeline.py                                   1           0  0.74s           2025-10-09T15:20:28
+================================================================================

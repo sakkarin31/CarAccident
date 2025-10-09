@@ -1,21 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Batch-normalize Songkhla weather CSVs to a 30-minute grid, reformat date to DD/MM/YYYY,
-fill gaps using a centered rolling window (5 before + cur + 5 after),
-and map weather condition to 3 classes: {Clear, Rain, Mist}.
-
-Outputs (per year):
-  - songkhla_weather_{YEAR}-final.csv
-  - songkhla_weather_{YEAR}-final_filled.csv
-  - songkhla_weather_{YEAR}-final_3class.csv
-"""
-
 import pandas as pd
 import numpy as np
 from pathlib import Path
 from typing import List, Optional
 
-# ================= CONFIG =================
+# CONFIG
 YEARS = [2020,2021,2022,2023,2024]         # ปรับปีได้
 IN_PATTERN  = "songkhla_weather_{year}.csv"
 ROUNDING = "round"                  # "round" | "floor" | "ceil"
@@ -27,7 +15,7 @@ FORCE_FULL_YEAR = True              # <<< ตั้ง True เพื่อใ�
 # เช่น 48 = 1 วัน; ตั้ง None จะไม่จำกัด (ระวังเดาข้ามหลายเดือน)
 INTERP_LIMIT_STEPS: Optional[int] = 48
 
-# =============== HELPERS =================
+# HELPERS
 def _find_col(df: pd.DataFrame, candidates: List[str]) -> Optional[str]:
     cols_lower = {c.lower(): c for c in df.columns}
     for cand in candidates:
@@ -88,7 +76,7 @@ def map_condition_3class(series: pd.Series) -> pd.Series:
 def _is_leap(y: int) -> bool:
     return (y % 4 == 0) and (y % 100 != 0 or y % 400 == 0)
 
-# =============== CORE =================
+# CORE
 def reformat_and_fill(df: pd.DataFrame,
                       rounding: str = "round",
                       force_full_year: bool = False,
@@ -153,7 +141,7 @@ def reformat_and_fill(df: pd.DataFrame,
 
     before = reidx.copy()
 
-    # ===== เติมค่าคอลัมน์ตัวเลข =====
+    # เติมค่าคอลัมน์ตัวเลข
     num_cols = [c for c in reidx.columns if pd.to_numeric(reidx[c], errors="coerce").notna().sum() > 0]
     if num_cols:
         num_df = reidx[num_cols].apply(pd.to_numeric, errors="coerce")
@@ -168,7 +156,7 @@ def reformat_and_fill(df: pd.DataFrame,
         num_df = num_df.ffill().bfill()
         reidx[num_cols] = num_df
 
-    # ===== condition → 3 classes =====
+    # condition → 3 classes
     cond_col = next((c for c in ["condition", "สภาพอากาศ", "weather"] if c in reidx.columns and c not in num_cols), None)
     if cond_col:
         filled_cond = before[cond_col].astype(object).ffill().bfill().fillna("Clear")
