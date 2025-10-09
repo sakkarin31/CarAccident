@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
-# ======= CONFIG (หลายปี) =======
+# CONFIG (หลายปี)
 BASE = Path(".")
 YEARS = [2020, 2021, 2022, 2023, 2024]  # ปรับปีตามต้องการ
 WEATHER_FMT  = "songkhla_weather_{year}-final_3class.csv"
@@ -11,7 +11,7 @@ ACCIDENT_FMT = "accident{year}-4_songkhla.csv"
 OUT_FMT      = "songkhla_weather_{year}-merged.csv"
 SPECIALS_CSV = BASE / "special_days_th.csv"   # optional: date,name,kind
 
-# ======= HELPERS =======
+# HELPERS
 def read_csv_smart(path: Path):
     last_err = None
     for enc in ("utf-8", "utf-8-sig", "cp874", "iso-8859-11"):
@@ -74,17 +74,17 @@ def process_year(year: int):
     OUT_FILE      = BASE / OUT_FMT.format(year=year)
 
     if not WEATHER_FILE.exists():
-        print(f"⚠️ {year}: ไม่พบไฟล์สภาพอากาศ -> {WEATHER_FILE.name} (ข้ามปีนี้)")
+        print(f"{year}: ไม่พบไฟล์สภาพอากาศ -> {WEATHER_FILE.name} (ข้ามปีนี้)")
         return
     if not ACCIDENT_FILE.exists():
-        print(f"⚠️ {year}: ไม่พบไฟล์อุบัติเหตุ -> {ACCIDENT_FILE.name} (ข้ามปีนี้)")
+        print(f"{year}: ไม่พบไฟล์อุบัติเหตุ -> {ACCIDENT_FILE.name} (ข้ามปีนี้)")
         return
 
-    # ===== LOAD =====
+    # LOAD
     dfw = read_csv_smart(WEATHER_FILE)
     dfa = read_csv_smart(ACCIDENT_FILE)
 
-    # ===== WEATHER KEY (30-min grid already) =====
+    # WEATHER KEY (30-min grid already)
     dtw_date = parse_ddmmyyyy(dfw["date"])
     dtw_time = pd.to_datetime(dfw["time"], format="%I:%M %p", errors="coerce")
     dtw = pd.to_datetime(dtw_date.dt.strftime("%Y-%m-%d")) \
@@ -94,7 +94,7 @@ def process_year(year: int):
     dfw = dfw.copy()
     dfw["__dt30__"] = dtw
 
-    # ===== ACCIDENT KEY (round to 30min) =====
+    # ACCIDENT KEY (round to 30min)
     dta_date = pd.to_datetime(dfa["วันที่เกิดเหตุ"], errors="coerce", dayfirst=True)
     dta_time = parse_time_flexible(dfa["เวลา"])
     dta = pd.to_datetime(dta_date.dt.strftime("%Y-%m-%d")) \
@@ -140,7 +140,7 @@ def process_year(year: int):
         "vehicles_lt_4_wheels","vehicles_4_wheels","vehicles_gt_4_wheels"
     ]
 
-    # ===== Day-of-week & Holidays (TH) =====
+    # Day-of-week & Holidays (TH)
     dt = pd.to_datetime(merged["__dt30__"], errors="coerce")
     merged["day_of_week"] = dt.dt.dayofweek
     merged["is_weekend"]  = (merged["day_of_week"] >= 5).astype(int)
@@ -171,14 +171,14 @@ def process_year(year: int):
 
     # save
     merged[final_cols].to_csv(OUT_FILE, index=False, encoding="utf-8-sig")
-    print(f"✅ {year}: Saved -> {OUT_FILE.name}")
+    print(f"{year}: Saved -> {OUT_FILE.name}")
 
 def main():
     for y in YEARS:
         try:
             process_year(y)
         except Exception as e:
-            print(f"❌ {y}: เกิดข้อผิดพลาด: {e}")
+            print(f"{y}: เกิดข้อผิดพลาด: {e}")
 
 if __name__ == "__main__":
     main()

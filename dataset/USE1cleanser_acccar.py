@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
 import pandas as pd
 import numpy as np
 from pathlib import Path
 
-# ========= CONFIG =========
+# CONFIG
 IN_DIR   = Path(".")     # โฟลเดอร์ที่มี accidentYYYY.csv
 OUT_DIR  = Path(".")     # โฟลเดอร์เอาท์พุต
 YEARS    = [2020, 2021, 2022, 2023, 2024]   # ปีที่อยากประมวลผล
 FILE_FMT = "accident{year}.csv"             # ชื่อไฟล์อินพุต
 PROVINCE = "สงขลา"
 ROUTE    = "4"           # รหัสสายทางที่ต้องการ
-# =========================
+
 
 def normalize_date_mdy_or_serial(series):
     """
@@ -43,7 +42,7 @@ def to_hhmm_ampm(series):
 
 def process_one_file(in_path: Path, out_dir: Path) -> Path | None:
     if not in_path.exists():
-        print(f"⚠️ ไม่พบไฟล์: {in_path.name} (ข้าม)")
+        print(f"ไม่พบไฟล์: {in_path.name} (ข้าม)")
         return None
 
     # อ่านไฟล์ (ลอง utf-8-sig ก่อน แล้วค่อย utf-8 / cp874)
@@ -56,7 +55,7 @@ def process_one_file(in_path: Path, out_dir: Path) -> Path | None:
             tried.append((enc, str(e)))
             df = None
     if df is None:
-        print(f"❌ อ่านไฟล์ล้มเหลว: {in_path.name}\n  tried={tried}")
+        print(f"อ่านไฟล์ล้มเหลว: {in_path.name}\n  tried={tried}")
         return None
 
     # 1) แปลงวันที่/เวลา (ถ้ามีคอลัมน์)
@@ -83,13 +82,13 @@ def process_one_file(in_path: Path, out_dir: Path) -> Path | None:
         df['จังหวัด'] = df['จังหวัด'].astype(str).str.strip()
         df = df[df['จังหวัด'] == PROVINCE]
     else:
-        print("⚠️ ไม่มีคอลัมน์ 'จังหวัด' — ไม่ได้กรองจังหวัด")
+        print("ไม่มีคอลัมน์ 'จังหวัด' — ไม่ได้กรองจังหวัด")
 
     if 'รหัสสายทาง' in df.columns:
         df['รหัสสายทาง'] = df['รหัสสายทาง'].astype(str).str.strip()
         df = df[df['รหัสสายทาง'] == ROUTE]
     else:
-        print("⚠️ ไม่มีคอลัมน์ 'รหัสสายทาง' — ไม่ได้กรองสายทาง")
+        print("ไม่มีคอลัมน์ 'รหัสสายทาง' — ไม่ได้กรองสายทาง")
 
     # 4) alias ชื่อคอลัมน์ประเภทรถ (บางไฟล์ใช้ชื่อไม่เหมือนกัน)
     alias = {
@@ -133,13 +132,13 @@ def process_one_file(in_path: Path, out_dir: Path) -> Path | None:
         df.loc[mask_ok, 'เวลา']         = df.loc[mask_ok, '__dt30__'].dt.strftime('%I:%M %p')
         df.drop(columns='__dt30__', inplace=True)
     else:
-        print("⚠️ ไม่มี 'วันที่เกิดเหตุ' หรือ 'เวลา' — ข้ามการปัดเวลา")
+        print("ไม่มี 'วันที่เกิดเหตุ' หรือ 'เวลา' — ข้ามการปัดเวลา")
 
     # 8) เซฟ
     out_path = out_dir / (in_path.stem + "-4_songkhla.csv")
     df.to_csv(out_path, index=False, encoding="utf-8-sig")
 
-    print(f"✅ {in_path.name} -> {out_path.name} | rows={len(df)}")
+    print(f"{in_path.name} -> {out_path.name} | rows={len(df)}")
     return out_path
 
 def main():

@@ -5,13 +5,13 @@ import re
 from pathlib import Path
 from typing import List
 
-# ================= CONFIG =================
+# CONFIG
 YEARS = [63,64,65,66,67]        # ปรับปีได้
 IN_PATTERN  = "aadt-{year}.csv"
 OUT_PATTERN = "car-count{year}.csv"
 BASE_DIR = Path(".")
 
-# ================= HELPERS =================
+# HELPERS
 def read_csv_thai(path: Path) -> pd.DataFrame:
     """อ่าน CSV รองรับไทย: ลอง utf-8, utf-8-sig, cp874 ตามลำดับ"""
     for enc in (None, "utf-8-sig", "cp874"):
@@ -149,7 +149,7 @@ def bucketize(df: pd.DataFrame) -> pd.DataFrame:
     df_out = pd.concat([df_out, pd.DataFrame([total_row])], ignore_index=True)
     return df_out
 
-# ================= MAIN =================
+# MAIN
 if __name__ == "__main__":
     for y in YEARS:
         in_path = BASE_DIR / IN_PATTERN.format(year=y)
