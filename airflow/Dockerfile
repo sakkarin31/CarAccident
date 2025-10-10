@@ -4,9 +4,9 @@ ARG AIRFLOW_VERSION=2.9.3
 ARG PYTHON_VERSION=3.10
 ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
 
+# สลับเป็น root เพื่อติดตั้ง dependencies ของ Chrome
 USER root
 
-# ติดตั้ง Chromium + ChromeDriver + dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium-driver \
     chromium \
@@ -22,8 +22,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libasound2 \
     && rm -rf /var/lib/apt/lists/*
 
+# กลับมาเป็น user airflow (ตามมาตรฐานของ Apache Airflow)
 USER airflow
 
-# ติดตั้ง Python packages
+# Copy requirements.txt ไปไว้ใน container (โฟลเดอร์เดียวกับ Dockerfile)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt -c "${CONSTRAINT_URL}"
+
+# ติดตั้ง Python packages พร้อม constraint ของ Airflow (สำคัญ!)
+RUN pip install --no-cache-dir -r requirements.txt --constraint "${CONSTRAINT_URL}"
+
+# Copy โค้ด DAGs และ tasks เข้าไป
+COPY dags/ /opt/airflow/dags/
+COPY dags/tasks/ /opt/airflow/dags/tasks/

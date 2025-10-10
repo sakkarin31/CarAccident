@@ -7,6 +7,11 @@ numpy>=1.23
 prophet==1.1.5
 matplotlib
 plotly
+seaborn
+scikit-learn
+lightgbm
+xgboost
+joblib
 
 # Database & Spark
 psycopg2-binary
@@ -31,7 +36,7 @@ rtree; extra == "rtree"  # optional but recommended
 streamlit>=1.18
 streamlit-folium>=0.11
 
-# Web parsing (แนะนำเพิ่ม)
+# Web parsing
 requests
 beautifulsoup4
 lxml
