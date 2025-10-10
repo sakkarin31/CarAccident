@@ -1,4 +1,37 @@
+# Airflow core
 apache-airflow==2.9.2
-pandas
+
+# Data & ML
+pandas>=1.5
+numpy>=1.23
 prophet==1.1.5
 matplotlib
+plotly
+
+# Database & Spark
+psycopg2-binary
+sqlalchemy
+apache-airflow-providers-postgres
+pyspark==3.5.1
+apache-airflow-providers-apache-spark
+
+# Web scraping (แต่ไม่ใช้ webdriver-manager ใน container)
+selenium
+
+# Geospatial & Mapping
+geopandas>=0.13
+osmnx>=1.2
+networkx>=2.8
+folium>=0.14
+branca>=0.6
+shapely>=2.0
+rtree; extra == "rtree"  # optional but recommended
+
+# Streamlit (สำหรับแอปแยก ไม่รันใน Airflow โดยตรง)
+streamlit>=1.18
+streamlit-folium>=0.11
+
+# Web parsing (แนะนำเพิ่ม)
+requests
+beautifulsoup4
+lxml

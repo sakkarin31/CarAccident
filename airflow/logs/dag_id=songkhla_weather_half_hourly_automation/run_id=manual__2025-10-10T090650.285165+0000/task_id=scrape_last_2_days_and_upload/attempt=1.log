@@ -1,0 +1,58 @@
+[2025-10-10T09:06:03.271+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-10T09:06:51.494+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: songkhla_weather_half_hourly_automation.scrape_last_2_days_and_upload manual__2025-10-10T09:06:50.285165+00:00 [queued]>
+[2025-10-10T09:06:51.503+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: songkhla_weather_half_hourly_automation.scrape_last_2_days_and_upload manual__2025-10-10T09:06:50.285165+00:00 [queued]>
+[2025-10-10T09:06:51.504+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 2
+[2025-10-10T09:06:51.519+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): scrape_last_2_days_and_upload> on 2025-10-10 09:06:50.285165+00:00
+[2025-10-10T09:06:51.525+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'songkhla_weather_half_hourly_automation', 'scrape_last_2_days_and_upload', 'manual__2025-10-10T09:06:50.285165+00:00', '--job-id', '4', '--raw', '--subdir', 'DAGS_FOLDER/scraping_weather.py', '--cfg-path', '/tmp/tmpxgwdf5uf']
+[2025-10-10T09:06:51.525+0000] {logging_mixin.py:188} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61 DeprecationWarning: This process (pid=1389) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2025-10-10T09:06:51.527+0000] {standard_task_runner.py:91} INFO - Job 4: Subtask scrape_last_2_days_and_upload
+[2025-10-10T09:06:51.528+0000] {standard_task_runner.py:63} INFO - Started process 1391 to run task
+[2025-10-10T09:06:51.545+0000] {logging_mixin.py:188} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:195 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2025-10-10T09:06:51.578+0000] {task_command.py:426} INFO - Running <TaskInstance: songkhla_weather_half_hourly_automation.scrape_last_2_days_and_upload manual__2025-10-10T09:06:50.285165+00:00 [running]> on host 104b2f41d292
+[2025-10-10T09:06:51.650+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='songkhla_weather_half_hourly_automation' AIRFLOW_CTX_TASK_ID='scrape_last_2_days_and_upload' AIRFLOW_CTX_EXECUTION_DATE='2025-10-10T09:06:50.285165+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-10T09:06:50.285165+00:00'
+[2025-10-10T09:06:51.652+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-10T09:06:55.640+0000] {scraping_weather.py:81} INFO - 🔄 เริ่ม scrap วันที่ 2025-10-09
+[2025-10-10T09:07:01.004+0000] {scraping_weather.py:105} INFO - 📊 พบ 48 แถวในวันที่ 2025-10-09
+[2025-10-10T09:07:06.880+0000] {scraping_weather.py:81} INFO - 🔄 เริ่ม scrap วันที่ 2025-10-10
+[2025-10-10T09:07:10.976+0000] {scraping_weather.py:105} INFO - 📊 พบ 32 แถวในวันที่ 2025-10-10
+[2025-10-10T09:07:15.366+0000] {base.py:84} INFO - Using connection ID 'postgres_default' for task execution.
+[2025-10-10T09:07:15.369+0000] {scraping_weather.py:43} INFO - ✅ ตรวจสอบ/สร้างตาราง songkhla_weather_half_hourly เรียบร้อย
+[2025-10-10T09:07:15.374+0000] {scraping_weather.py:182} ERROR - 💥 เกิดข้อผิดพลาดร้ายแรง: The conn_id `my_postgres_db` isn't defined
+[2025-10-10T09:07:15.375+0000] {connectionpool.py:872} WARNING - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fb55bfdcf80>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/6bd09f301a87358fe14a5131c0ae6424
+[2025-10-10T09:07:15.376+0000] {connectionpool.py:872} WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fb55bfde000>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/6bd09f301a87358fe14a5131c0ae6424
+[2025-10-10T09:07:15.377+0000] {connectionpool.py:872} WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fb55bfde2d0>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/6bd09f301a87358fe14a5131c0ae6424
+[2025-10-10T09:07:15.378+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-10T09:07:15.383+0000] {taskinstance.py:2905} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 401, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 235, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 252, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/scraping_weather.py", line 151, in scrape_last_2_days_and_upload
+    conn = pg_hook.get_conn()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/postgres/hooks/postgres.py", line 145, in get_conn
+    conn = deepcopy(self.connection or self.get_connection(conn_id))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/hooks/base.py", line 83, in get_connection
+    conn = Connection.get_connection_from_secrets(conn_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/connection.py", line 519, in get_connection_from_secrets
+    raise AirflowNotFoundException(f"The conn_id `{conn_id}` isn't defined")
+airflow.exceptions.AirflowNotFoundException: The conn_id `my_postgres_db` isn't defined
+[2025-10-10T09:07:15.391+0000] {taskinstance.py:1206} INFO - Marking task as UP_FOR_RETRY. dag_id=songkhla_weather_half_hourly_automation, task_id=scrape_last_2_days_and_upload, run_id=manual__2025-10-10T09:06:50.285165+00:00, execution_date=20251010T090650, start_date=20251010T090651, end_date=20251010T090715
+[2025-10-10T09:07:15.399+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 4 for task scrape_last_2_days_and_upload (The conn_id `my_postgres_db` isn't defined; 1391)
+[2025-10-10T09:07:15.436+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2025-10-10T09:07:15.447+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-10-10T09:07:15.451+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

@@ -1,0 +1,56 @@
+[2025-10-09T15:39:21.234+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-09T15:39:21.375+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: songkhla_weather_monthly_automation.scrape_monthly_average_and_upload manual__2025-10-09T15:34:18.263976+00:00 [queued]>
+[2025-10-09T15:39:21.383+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: songkhla_weather_monthly_automation.scrape_monthly_average_and_upload manual__2025-10-09T15:34:18.263976+00:00 [queued]>
+[2025-10-09T15:39:21.387+0000] {taskinstance.py:2306} INFO - Starting attempt 2 of 2
+[2025-10-09T15:39:21.399+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): scrape_monthly_average_and_upload> on 2025-10-09 15:34:18.263976+00:00
+[2025-10-09T15:39:21.408+0000] {logging_mixin.py:188} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61 DeprecationWarning: This process (pid=455) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2025-10-09T15:39:21.409+0000] {standard_task_runner.py:63} INFO - Started process 457 to run task
+[2025-10-09T15:39:21.408+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'songkhla_weather_monthly_automation', 'scrape_monthly_average_and_upload', 'manual__2025-10-09T15:34:18.263976+00:00', '--job-id', '8', '--raw', '--subdir', 'DAGS_FOLDER/scraping_weather.py', '--cfg-path', '/tmp/tmpiip3ooqe']
+[2025-10-09T15:39:21.411+0000] {standard_task_runner.py:91} INFO - Job 8: Subtask scrape_monthly_average_and_upload
+[2025-10-09T15:39:21.457+0000] {task_command.py:426} INFO - Running <TaskInstance: songkhla_weather_monthly_automation.scrape_monthly_average_and_upload manual__2025-10-09T15:34:18.263976+00:00 [running]> on host e7d221891243
+[2025-10-09T15:39:21.540+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='songkhla_weather_monthly_automation' AIRFLOW_CTX_TASK_ID='scrape_monthly_average_and_upload' AIRFLOW_CTX_EXECUTION_DATE='2025-10-09T15:34:18.263976+00:00' AIRFLOW_CTX_TRY_NUMBER='2' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-09T15:34:18.263976+00:00'
+[2025-10-09T15:39:21.541+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-09T15:39:21.551+0000] {logger.py:11} INFO - ====== WebDriver manager ======
+[2025-10-09T15:39:21.566+0000] {logger.py:11} INFO - Get LATEST chromedriver version for google-chrome
+[2025-10-09T15:39:21.760+0000] {logger.py:11} INFO - About to download new driver from https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+[2025-10-09T15:39:21.930+0000] {logger.py:11} INFO - Driver downloading response is 200
+[2025-10-09T15:39:22.281+0000] {logger.py:11} INFO - Get LATEST chromedriver version for google-chrome
+[2025-10-09T15:39:22.577+0000] {logger.py:11} INFO - Get LATEST chromedriver version for google-chrome
+[2025-10-09T15:39:22.685+0000] {logger.py:11} INFO - Driver has been saved in cache [/home/***/.wdm/drivers/chromedriver/linux64/114.0.5735.90]
+[2025-10-09T15:39:22.698+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-09T15:39:22.700+0000] {taskinstance.py:2905} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 401, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 235, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 252, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/scraping_weather.py", line 66, in scrape_monthly_average_and_upload
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/selenium/webdriver/chrome/webdriver.py", line 46, in __init__
+    super().__init__(
+  File "/home/airflow/.local/lib/python3.12/site-packages/selenium/webdriver/chromium/webdriver.py", line 60, in __init__
+    self.service.start()
+  File "/home/airflow/.local/lib/python3.12/site-packages/selenium/webdriver/common/service.py", line 109, in start
+    self.assert_process_still_running()
+  File "/home/airflow/.local/lib/python3.12/site-packages/selenium/webdriver/common/service.py", line 122, in assert_process_still_running
+    raise WebDriverException(f"Service {self._path} unexpectedly exited. Status code was: {return_code}")
+selenium.common.exceptions.WebDriverException: Message: Service /home/airflow/.wdm/drivers/chromedriver/linux64/114.0.5735.90/chromedriver unexpectedly exited. Status code was: 127
+
+[2025-10-09T15:39:22.711+0000] {taskinstance.py:1206} INFO - Marking task as FAILED. dag_id=songkhla_weather_monthly_automation, task_id=scrape_monthly_average_and_upload, run_id=manual__2025-10-09T15:34:18.263976+00:00, execution_date=20251009T153418, start_date=20251009T153921, end_date=20251009T153922
+[2025-10-09T15:39:22.722+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 8 for task scrape_monthly_average_and_upload (Message: Service /home/airflow/.wdm/drivers/chromedriver/linux64/114.0.5735.90/chromedriver unexpectedly exited. Status code was: 127
+; 457)
+[2025-10-09T15:39:22.749+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2025-10-09T15:39:22.763+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-10-09T15:39:22.768+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

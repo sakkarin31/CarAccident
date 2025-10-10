@@ -1,0 +1,80 @@
+[2025-10-09T16:16:16.409+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-09T16:16:16.683+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: songkhla_weather_monthly_automation.scrape_monthly_average_and_upload manual__2025-10-09T16:16:13.753925+00:00 [queued]>
+[2025-10-09T16:16:16.691+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: songkhla_weather_monthly_automation.scrape_monthly_average_and_upload manual__2025-10-09T16:16:13.753925+00:00 [queued]>
+[2025-10-09T16:16:16.692+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 2
+[2025-10-09T16:16:16.705+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): scrape_monthly_average_and_upload> on 2025-10-09 16:16:13.753925+00:00
+[2025-10-09T16:16:16.714+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'songkhla_weather_monthly_automation', 'scrape_monthly_average_and_upload', 'manual__2025-10-09T16:16:13.753925+00:00', '--job-id', '5', '--raw', '--subdir', 'DAGS_FOLDER/scraping_weather.py', '--cfg-path', '/tmp/tmpb9zsuxyd']
+[2025-10-09T16:16:16.718+0000] {logging_mixin.py:188} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61 DeprecationWarning: This process (pid=2003) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2025-10-09T16:16:16.721+0000] {standard_task_runner.py:63} INFO - Started process 2005 to run task
+[2025-10-09T16:16:16.721+0000] {standard_task_runner.py:91} INFO - Job 5: Subtask scrape_monthly_average_and_upload
+[2025-10-09T16:16:16.788+0000] {task_command.py:426} INFO - Running <TaskInstance: songkhla_weather_monthly_automation.scrape_monthly_average_and_upload manual__2025-10-09T16:16:13.753925+00:00 [running]> on host ad4d0fe7e1fd
+[2025-10-09T16:16:16.888+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='songkhla_weather_monthly_automation' AIRFLOW_CTX_TASK_ID='scrape_monthly_average_and_upload' AIRFLOW_CTX_EXECUTION_DATE='2025-10-09T16:16:13.753925+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-09T16:16:13.753925+00:00'
+[2025-10-09T16:16:16.890+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-09T16:16:35.999+0000] {scraping_weather.py:101} INFO - 📅 2025-09-01: {'temperatureF': 82.71, 'humidity_pct': 76.88, 'wind_speed_kmh': 6.88, 'pressure_in': 29.65}
+[2025-10-09T16:16:45.460+0000] {scraping_weather.py:101} INFO - 📅 2025-09-02: {'temperatureF': 82.96, 'humidity_pct': 74.19, 'wind_speed_kmh': 4.08, 'pressure_in': 29.67}
+[2025-10-09T16:16:58.056+0000] {scraping_weather.py:101} INFO - 📅 2025-09-03: {'temperatureF': 78.33, 'humidity_pct': 86.27, 'wind_speed_kmh': 4.38, 'pressure_in': 29.69}
+[2025-10-09T16:17:08.500+0000] {scraping_weather.py:101} INFO - 📅 2025-09-04: {'temperatureF': 79.46, 'humidity_pct': 83.08, 'wind_speed_kmh': 4.6, 'pressure_in': 29.68}
+[2025-10-09T16:17:18.166+0000] {scraping_weather.py:101} INFO - 📅 2025-09-05: {'temperatureF': 82.12, 'humidity_pct': 75.88, 'wind_speed_kmh': 6.65, 'pressure_in': 29.68}
+[2025-10-09T16:17:28.847+0000] {scraping_weather.py:101} INFO - 📅 2025-09-06: {'temperatureF': 81.42, 'humidity_pct': 82.6, 'wind_speed_kmh': 5.44, 'pressure_in': 29.68}
+[2025-10-09T16:17:40.750+0000] {scraping_weather.py:101} INFO - 📅 2025-09-07: {'temperatureF': 80.92, 'humidity_pct': 84.08, 'wind_speed_kmh': 4.1, 'pressure_in': 29.69}
+[2025-10-09T16:17:53.155+0000] {scraping_weather.py:101} INFO - 📅 2025-09-08: {'temperatureF': 80.44, 'humidity_pct': 85.79, 'wind_speed_kmh': 3.08, 'pressure_in': 29.68}
+[2025-10-09T16:18:04.669+0000] {scraping_weather.py:101} INFO - 📅 2025-09-09: {'temperatureF': 80.1, 'humidity_pct': 80.88, 'wind_speed_kmh': 4.02, 'pressure_in': 29.73}
+[2025-10-09T16:18:15.256+0000] {scraping_weather.py:101} INFO - 📅 2025-09-10: {'temperatureF': 81.62, 'humidity_pct': 76.96, 'wind_speed_kmh': 3.17, 'pressure_in': 29.72}
+[2025-10-09T16:18:28.796+0000] {scraping_weather.py:101} INFO - 📅 2025-09-11: {'temperatureF': 79.98, 'humidity_pct': 83.31, 'wind_speed_kmh': 3.12, 'pressure_in': 29.71}
+[2025-10-09T16:18:40.520+0000] {scraping_weather.py:101} INFO - 📅 2025-09-12: {'temperatureF': 80.1, 'humidity_pct': 83.23, 'wind_speed_kmh': 4.4, 'pressure_in': 29.71}
+[2025-10-09T16:18:52.239+0000] {scraping_weather.py:101} INFO - 📅 2025-09-13: {'temperatureF': 77.75, 'humidity_pct': 89.44, 'wind_speed_kmh': 4.67, 'pressure_in': 29.73}
+[2025-10-09T16:19:03.454+0000] {scraping_weather.py:101} INFO - 📅 2025-09-14: {'temperatureF': 80.3, 'humidity_pct': 84.04, 'wind_speed_kmh': 3.57, 'pressure_in': 29.72}
+[2025-10-09T16:19:15.333+0000] {scraping_weather.py:101} INFO - 📅 2025-09-15: {'temperatureF': 79.88, 'humidity_pct': 83.27, 'wind_speed_kmh': 4.29, 'pressure_in': 29.73}
+[2025-10-09T16:19:27.121+0000] {scraping_weather.py:101} INFO - 📅 2025-09-16: {'temperatureF': 82.23, 'humidity_pct': 80.23, 'wind_speed_kmh': 2.94, 'pressure_in': 29.71}
+[2025-10-09T16:19:37.800+0000] {scraping_weather.py:101} INFO - 📅 2025-09-17: {'temperatureF': 82.58, 'humidity_pct': 81.29, 'wind_speed_kmh': 4.77, 'pressure_in': 29.7}
+[2025-10-09T16:19:03.416+0000] {scraping_weather.py:101} INFO - 📅 2025-09-18: {'temperatureF': 81.27, 'humidity_pct': 84.44, 'wind_speed_kmh': 4.21, 'pressure_in': 29.7}
+[2025-10-09T16:20:01.337+0000] {scraping_weather.py:101} INFO - 📅 2025-09-19: {'temperatureF': 83.54, 'humidity_pct': 73.88, 'wind_speed_kmh': 5.42, 'pressure_in': 29.71}
+[2025-10-09T16:20:13.757+0000] {scraping_weather.py:101} INFO - 📅 2025-09-20: {'temperatureF': 82.69, 'humidity_pct': 71.92, 'wind_speed_kmh': 5.44, 'pressure_in': 29.71}
+[2025-10-09T16:20:26.626+0000] {scraping_weather.py:101} INFO - 📅 2025-09-21: {'temperatureF': 83.02, 'humidity_pct': 70.75, 'wind_speed_kmh': 4.88, 'pressure_in': 29.69}
+[2025-10-09T16:20:37.532+0000] {scraping_weather.py:101} INFO - 📅 2025-09-22: {'temperatureF': 82.69, 'humidity_pct': 72.54, 'wind_speed_kmh': 3.25, 'pressure_in': 29.71}
+[2025-10-09T16:20:49.490+0000] {scraping_weather.py:101} INFO - 📅 2025-09-23: {'temperatureF': 83.06, 'humidity_pct': 73.25, 'wind_speed_kmh': 6.27, 'pressure_in': 29.71}
+[2025-10-09T16:21:00.782+0000] {scraping_weather.py:101} INFO - 📅 2025-09-24: {'temperatureF': 84.31, 'humidity_pct': 70.11, 'wind_speed_kmh': 8.47, 'pressure_in': 29.67}
+[2025-10-09T16:21:13.975+0000] {scraping_weather.py:101} INFO - 📅 2025-09-25: {'temperatureF': 84.67, 'humidity_pct': 68.69, 'wind_speed_kmh': 7.25, 'pressure_in': 29.67}
+[2025-10-09T16:21:26.628+0000] {scraping_weather.py:101} INFO - 📅 2025-09-26: {'temperatureF': 81.58, 'humidity_pct': 80.48, 'wind_speed_kmh': 2.69, 'pressure_in': 29.7}
+[2025-10-09T16:21:37.527+0000] {scraping_weather.py:101} INFO - 📅 2025-09-27: {'temperatureF': 82.85, 'humidity_pct': 78.04, 'wind_speed_kmh': 2.96, 'pressure_in': 29.71}
+[2025-10-09T16:21:47.886+0000] {scraping_weather.py:101} INFO - 📅 2025-09-28: {'temperatureF': 79.83, 'humidity_pct': 83.73, 'wind_speed_kmh': 5.9, 'pressure_in': 29.68}
+[2025-10-09T16:21:57.908+0000] {scraping_weather.py:101} INFO - 📅 2025-09-29: {'temperatureF': 76.5, 'humidity_pct': 90.15, 'wind_speed_kmh': 5.69, 'pressure_in': 29.69}
+[2025-10-09T16:22:06.884+0000] {scraping_weather.py:101} INFO - 📅 2025-09-30: {'temperatureF': 81.68, 'humidity_pct': 79.68, 'wind_speed_kmh': 2.62, 'pressure_in': 29.69}
+[2025-10-09T16:22:08.059+0000] {scraping_weather.py:119} INFO - 📊 ค่าเฉลี่ยรายเดือน 2025-09: {'temperatureF': 81.35, 'humidity_pct': 79.64, 'wind_speed_kmh': 4.64, 'pressure_in': 29.7}
+[2025-10-09T16:22:08.066+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-09T16:22:08.073+0000] {taskinstance.py:2905} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 401, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 235, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 252, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/scraping_weather.py", line 121, in scrape_monthly_average_and_upload
+    create_monthly_table_if_not_exists()
+  File "/opt/airflow/dags/scraping_weather.py", line 24, in create_monthly_table_if_not_exists
+    conn = pg_hook.get_conn()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/postgres/hooks/postgres.py", line 145, in get_conn
+    conn = deepcopy(self.connection or self.get_connection(conn_id))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/hooks/base.py", line 83, in get_connection
+    conn = Connection.get_connection_from_secrets(conn_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/connection.py", line 519, in get_connection_from_secrets
+    raise AirflowNotFoundException(f"The conn_id `{conn_id}` isn't defined")
+airflow.exceptions.AirflowNotFoundException: The conn_id `my_postgres_db` isn't defined
+[2025-10-09T16:22:08.080+0000] {taskinstance.py:1206} INFO - Marking task as UP_FOR_RETRY. dag_id=songkhla_weather_monthly_automation, task_id=scrape_monthly_average_and_upload, run_id=manual__2025-10-09T16:16:13.753925+00:00, execution_date=20251009T161613, start_date=20251009T161616, end_date=20251009T162208
+[2025-10-09T16:22:08.091+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 5 for task scrape_monthly_average_and_upload (The conn_id `my_postgres_db` isn't defined; 2005)
+[2025-10-09T16:22:08.129+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2025-10-09T16:22:08.140+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-10-09T16:22:08.142+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

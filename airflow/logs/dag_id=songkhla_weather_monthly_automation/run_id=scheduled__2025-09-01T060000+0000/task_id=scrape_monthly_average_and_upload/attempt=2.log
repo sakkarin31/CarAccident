@@ -1,0 +1,76 @@
+[2025-10-09T15:39:20.142+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-10-09T15:39:20.286+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: songkhla_weather_monthly_automation.scrape_monthly_average_and_upload scheduled__2025-09-01T06:00:00+00:00 [queued]>
+[2025-10-09T15:39:20.293+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: songkhla_weather_monthly_automation.scrape_monthly_average_and_upload scheduled__2025-09-01T06:00:00+00:00 [queued]>
+[2025-10-09T15:39:20.298+0000] {taskinstance.py:2306} INFO - Starting attempt 2 of 2
+[2025-10-09T15:39:20.312+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): scrape_monthly_average_and_upload> on 2025-09-01 06:00:00+00:00
+[2025-10-09T15:39:20.323+0000] {logging_mixin.py:188} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61 DeprecationWarning: This process (pid=440) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2025-10-09T15:39:20.325+0000] {standard_task_runner.py:63} INFO - Started process 442 to run task
+[2025-10-09T15:39:20.323+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'songkhla_weather_monthly_automation', 'scrape_monthly_average_and_upload', 'scheduled__2025-09-01T06:00:00+00:00', '--job-id', '7', '--raw', '--subdir', 'DAGS_FOLDER/scraping_weather.py', '--cfg-path', '/tmp/tmp1q1by7g2']
+[2025-10-09T15:39:20.326+0000] {standard_task_runner.py:91} INFO - Job 7: Subtask scrape_monthly_average_and_upload
+[2025-10-09T15:39:20.373+0000] {task_command.py:426} INFO - Running <TaskInstance: songkhla_weather_monthly_automation.scrape_monthly_average_and_upload scheduled__2025-09-01T06:00:00+00:00 [running]> on host e7d221891243
+[2025-10-09T15:39:20.453+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='songkhla_weather_monthly_automation' AIRFLOW_CTX_TASK_ID='scrape_monthly_average_and_upload' AIRFLOW_CTX_EXECUTION_DATE='2025-09-01T06:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='2' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2025-09-01T06:00:00+00:00'
+[2025-10-09T15:39:20.454+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-10-09T15:39:20.465+0000] {logger.py:11} INFO - ====== WebDriver manager ======
+[2025-10-09T15:39:20.483+0000] {logger.py:11} INFO - Get LATEST chromedriver version for google-chrome
+[2025-10-09T15:39:20.847+0000] {logger.py:11} INFO - About to download new driver from https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+[2025-10-09T15:39:21.928+0000] {logger.py:11} INFO - Driver downloading response is 200
+[2025-10-09T15:39:22.280+0000] {logger.py:11} INFO - Get LATEST chromedriver version for google-chrome
+[2025-10-09T15:39:22.476+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-10-09T15:39:22.477+0000] {taskinstance.py:2905} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/webdriver_manager/core/file_manager.py", line 65, in __extract_zip
+    archive.extractall(to_directory)
+  File "/usr/local/lib/python3.12/zipfile/__init__.py", line 1744, in extractall
+    self._extract_member(zipinfo, path, pwd)
+  File "/usr/local/lib/python3.12/zipfile/__init__.py", line 1800, in _extract_member
+    with self.open(member, pwd=pwd) as source, \
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/zipfile/__init__.py", line 1622, in open
+    raise BadZipFile("Truncated file header")
+zipfile.BadZipFile: Truncated file header
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 401, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 235, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 252, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/scraping_weather.py", line 66, in scrape_monthly_average_and_upload
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/webdriver_manager/chrome.py", line 40, in install
+    driver_path = self._get_driver_binary_path(self.driver)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/webdriver_manager/core/manager.py", line 41, in _get_driver_binary_path
+    binary_path = self._cache_manager.save_file_to_cache(driver, file)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/webdriver_manager/core/driver_cache.py", line 54, in save_file_to_cache
+    files = self.unpack_archive(archive, path)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/webdriver_manager/core/driver_cache.py", line 49, in unpack_archive
+    return self._file_manager.unpack_archive(archive, path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/webdriver_manager/core/file_manager.py", line 57, in unpack_archive
+    return self.__extract_zip(archive_file, target_dir)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/webdriver_manager/core/file_manager.py", line 67, in __extract_zip
+    if e.args[0] not in [26, 13] and e.args[1] not in [
+                                     ~~~~~~^^^
+IndexError: tuple index out of range
+[2025-10-09T15:39:22.490+0000] {taskinstance.py:1206} INFO - Marking task as FAILED. dag_id=songkhla_weather_monthly_automation, task_id=scrape_monthly_average_and_upload, run_id=scheduled__2025-09-01T06:00:00+00:00, execution_date=20250901T060000, start_date=20251009T153920, end_date=20251009T153922
+[2025-10-09T15:39:22.500+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 7 for task scrape_monthly_average_and_upload (tuple index out of range; 442)
+[2025-10-09T15:39:22.549+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2025-10-09T15:39:22.560+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-10-09T15:39:22.567+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

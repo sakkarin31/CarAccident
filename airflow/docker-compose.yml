@@ -4,20 +4,23 @@ version: "3"
 # 🧱 Common configuration for all Airflow services
 # ------------------------------------------------------
 x-airflow-common: &airflow-common
-  image: custom-airflow:latest           # ใช้ image ที่ build จาก Dockerfile เดียวกัน
+  image: apache/airflow:2.9.3
   environment:
-    AIRFLOW__CORE__EXECUTOR: LocalExecutor
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-    AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-    AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+    - AIRFLOW__CORE__FERNET_KEY=aXxFKh5r1IZ0u-Vi5vjD8a1j7_F-GlTwCtIuHk06qBQ=    # ✅ ใส่ Fernet key ที่สร้างเอง
+    - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=true
+    - AIRFLOW__CORE__LOAD_EXAMPLES=false
+    - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
+    - AIRFLOW_CONN_POSTGRES_DEFAULT=postgresql+psycopg2://airflow:airflow@postgres/airflow
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
     - ./data:/opt/airflow/data
   user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    - postgres
 
 # ------------------------------------------------------
 # 🚀 Services
@@ -32,16 +35,16 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
 
   # 🧰 Initialize Airflow (run only once)
   airflow-init:
     <<: *airflow-common
-    build: .   # build image จาก Dockerfile ในโฟลเดอร์นี้ (airflow/)
     command: >
       bash -c "airflow db init &&
                airflow users create --username admin --password admin --firstname admin --lastname user --role Admin --email admin@example.com"
-    depends_on:
-      - postgres
+    restart: "no"
 
   # 🌐 Airflow Web UI
   webserver:
@@ -49,25 +52,23 @@ services:
     command: webserver
     ports:
       - "8080:8080"
-    depends_on:
-      - postgres
+    restart: always
 
   # ⏱️ Scheduler
   scheduler:
     <<: *airflow-common
     command: scheduler
-    depends_on:
-      - postgres
+    restart: always
 
   # 🚦 Streamlit App
   streamlit:
     build:
-      context: ../app                # โฟลเดอร์ที่มี app_songkla.py
+      context: ../app                # 🔹 ชี้ไปยังโฟลเดอร์ที่มี app_songkla.py
     container_name: streamlit_app
     ports:
-      - "8501:8501"                  # เปิดเว็บที่ http://localhost:8501
+      - "8501:8501"                  # 🔹 เปิดเว็บที่ http://localhost:8501
     volumes:
-      - ../app:/app                  # sync โค้ดในเครื่องเข้าคอนเทนเนอร์
+      - ../app:/app                  # 🔹 sync โค้ดในเครื่องเข้าคอนเทนเนอร์
     depends_on:
       - postgres
 
