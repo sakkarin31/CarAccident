@@ -1,4 +1,6 @@
 venv/
-cache
-songkhla_roads.geojson
-app/test_app.py
+cache/
+airflow/logs/
+app/data/
+app/cache/
+data/
