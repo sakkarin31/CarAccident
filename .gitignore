@@ -4,3 +4,4 @@ airflow/logs/
 app/data/
 app/cache/
 data/
+airflow/dags/__pycache__
