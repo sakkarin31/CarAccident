@@ -292,7 +292,7 @@ def run_one_year(year: int):
 
     # columns & save
     cols_out = [
-        "date","time","temperature_F","humidity_%","pressure_in","condition",
+        "date","time","temperature_F","humidity_%","wind_speed_kmh","pressure_in","condition",
         "เกิดเหตุ","รถน้อยกว่า4ล้อacc","รถ4ล้อacc","รถมากกว่า4ล้อacc",
         "vehicles_lt_4_wheels","vehicles_4_wheels","vehicles_gt_4_wheels",
         "day_of_week","is_weekend","is_holiday","is_special","is_eve_or_return"

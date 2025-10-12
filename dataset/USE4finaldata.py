@@ -13,7 +13,7 @@ OUT_COMBINED  = "cleandaily-all-years.csv"      # ชื่อไฟล์รว
 
 DROP_COLS = ["condition", "รถน้อยกว่า4ล้อacc", "รถ4ล้อacc", "รถมากกว่า4ล้อacc"]
 NUMERIC_COLS = [
-    "temperature_F","humidity_%","pressure_in",
+    "temperature_F","humidity_%","wind_speed_kmh","pressure_in",
     "เกิดเหตุ","vehicles_lt_4_wheels","vehicles_4_wheels","vehicles_gt_4_wheels"
 ]
 
@@ -66,6 +66,7 @@ def daily_agg_one_year(in_path: Path, out_path: Path):
           .agg({
                "temperature_F": "mean",
                "humidity_%":    "mean",
+               "wind_speed_kmh": "mean",
                "pressure_in":   "mean",
                "เกิดเหตุ":            "sum",
                "vehicles_lt_4_wheels": "sum",
@@ -91,7 +92,7 @@ def daily_agg_one_year(in_path: Path, out_path: Path):
 
     # จัดลำดับคอลัมน์
     cols_out = [
-        "datetime","เกิดเหตุ","temperature_F","humidity_%","pressure_in",
+        "datetime","เกิดเหตุ","temperature_F","humidity_%","wind_speed_kmh","pressure_in",
         "vehicles_lt_4_wheels","vehicles_4_wheels","vehicles_gt_4_wheels",
         "day_of_week","is_weekend","is_holiday"
     ]
