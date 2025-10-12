@@ -16,6 +16,7 @@ x-airflow-common: &airflow-common
     - AIRFLOW__CORE__LOAD_EXAMPLES=false
     - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
     - AIRFLOW_CONN_POSTGRES_DEFAULT=postgresql+psycopg2://airflow:airflow@postgres/airflow
+    - AIRFLOW__WEBSERVER__SECRET_KEY=please-change-me-32bytes
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs

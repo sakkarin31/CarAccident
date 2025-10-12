@@ -1,9 +1,5 @@
 from datetime import datetime, timedelta, date
-import calendar
-import time
-import logging
-import pandas as pd
-import os
+import time, logging, re, os
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -11,201 +7,239 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+PG_CONN_ID = "postgres_default"
+WU_URL = "https://www.wunderground.com/history/daily/th/mueang-songkhla/VTSS"  # สงขลา/หาดใหญ่
+
+def _to_float(s: str):
+    if not s: return None
+    m = re.search(r"[-+]?\d+(?:\.\d+)?", s.replace(",", ""))
+    return float(m.group(0)) if m else None
 
 def create_hourly_table_if_not_exists():
-    """สร้างตารางสำหรับเก็บข้อมูลรายครึ่งชั่วโมง"""
-    pg_hook = PostgresHook(postgres_conn_id='postgres_default')
-    conn = pg_hook.get_conn()
-    cursor = conn.cursor()
-    cursor.execute("""
+    """สร้าง/อัปเดตตารางให้มีคอลัมน์ condition ด้วย"""
+    pg = PostgresHook(postgres_conn_id=PG_CONN_ID)
+    pg.run("""
         CREATE TABLE IF NOT EXISTS songkhla_weather_half_hourly (
             id SERIAL PRIMARY KEY,
-            datetime TIMESTAMP,
-            temperatureF NUMERIC(6, 2),
-            humidity_pct NUMERIC(6, 2),
-            wind_speed_kmh NUMERIC(6, 2),
-            pressure_in NUMERIC(6, 3),
-            created_at TIMESTAMP DEFAULT NOW(),
-            UNIQUE(datetime)
+            datetime TIMESTAMP UNIQUE,
+            temperatureF NUMERIC(6,2),
+            humidity_pct NUMERIC(6,2),
+            wind_speed_kmh NUMERIC(6,2),
+            pressure_in NUMERIC(6,3),
+            condition TEXT,
+            created_at TIMESTAMP DEFAULT NOW()
         );
     """)
-    conn.commit()
-    cursor.close()
-    conn.close()
-    logger.info("✅ ตรวจสอบ/สร้างตาราง songkhla_weather_half_hourly เรียบร้อย")
+    pg.run("ALTER TABLE songkhla_weather_half_hourly ADD COLUMN IF NOT EXISTS condition TEXT;")
+    logger.info("✅ ตรวจสอบ/สร้างตาราง songkhla_weather_half_hourly (พร้อมคอลัมน์ condition) เรียบร้อย")
 
+def _select_date(driver, year: int, month: int, day: int, wait: WebDriverWait):
+    """พยายามเลือกวันที่ด้วย 2 วิธี (ID เดิม / ชื่อ name=year,month,day)"""
+    try:
+        # ชุด ID แบบเดิม
+        year_sel  = Select(wait.until(EC.presence_of_element_located((By.ID, "yearSelection"))))
+        month_sel = Select(wait.until(EC.presence_of_element_located((By.ID, "monthSelection"))))
+        day_sel   = Select(wait.until(EC.presence_of_element_located((By.ID, "daySelection"))))
+        year_sel.select_by_visible_text(str(year))
+        month_sel.select_by_index(month-1)  # 0-based
+        day_sel.select_by_visible_text(str(day))
+        wait.until(EC.element_to_be_clickable((By.ID, "dateSubmit"))).click()
+        return
+    except Exception:
+        pass
+    # fallback: select[name='year'|'month'|'day']
+    year_sel  = Select(wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='year']"))))
+    month_sel = Select(driver.find_element(By.CSS_SELECTOR, "select[name='month']"))
+    day_sel   = Select(driver.find_element(By.CSS_SELECTOR, "select[name='day']"))
+    year_sel.select_by_value(str(year))
+    month_sel.select_by_value(str(month))  # 1..12
+    day_sel.select_by_value(str(day))
+    driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
 
-def scrape_last_2_days_and_upload(**context):
-    """Scrape ข้อมูล 2 วันล่าสุด → ดึงทุกครึ่งชั่วโมง → บันทึกลง DB ทันที"""
+def _parse_rows(driver, base_date: date, wait: WebDriverWait):
+    """อ่านตารางด้วย header mapping → ดึง condition ให้ได้ (ไม่พึ่งตำแหน่งคงที่)"""
+    table = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table")))
+    thead = table.find_element(By.TAG_NAME, "thead")
+    headers = [th.text.replace("\n"," ").strip().lower() for th in thead.find_elements(By.TAG_NAME, "th")]
+
+    def idx(*cands):
+        for c in cands:
+            if c in headers: return headers.index(c)
+        return None
+
+    i_time  = idx("time", "local time")
+    i_temp  = idx("temperature", "temp")
+    i_hum   = idx("humidity")
+    i_wind  = idx("wind", "wind speed")
+    i_press = idx("pressure", "barometric pressure", "pressure (in)")
+    i_cond  = idx("conditions", "condition", "weather", "description")
+
+    # fallback ถ้าเว็บเปลี่ยนหัว
+    if None in (i_time, i_temp, i_hum, i_wind, i_press):
+        i_time, i_temp, i_hum, i_wind, i_press, i_cond = 0, 1, 3, 5, 7, -1
+
+    recs = []
+    for tr in table.find_element(By.TAG_NAME, "tbody").find_elements(By.TAG_NAME, "tr"):
+        tds = tr.find_elements(By.TAG_NAME, "td")
+        if not tds: 
+            continue
+        try:
+            # เวลา
+            ts = tds[i_time].text.strip()
+            tm = datetime.strptime(
+                ts.split()[0] + " " + (ts.split()[1] if len(ts.split())>1 else "AM"),
+                "%I:%M %p"
+            ).time()
+            dt_local = datetime.combine(base_date, tm)
+
+            # อุณหภูมิ/ความชื้น
+            temp_f = _to_float(tds[i_temp].text.strip())
+            humid  = _to_float(tds[i_hum].text.strip())
+
+            # ลม → km/h (รองรับ Calm, mph)
+            wind_raw = tds[i_wind].text.strip()
+            if wind_raw:
+                if "calm" in wind_raw.lower():
+                    wind_kmh = 0.0
+                else:
+                    wn = _to_float(wind_raw)
+                    wind_kmh = round(wn*1.60934, 2) if (wn is not None and "mph" in wind_raw.lower()) else wn
+            else:
+                wind_kmh = None
+
+            # ความกดอากาศ (in)
+            press_in = _to_float(tds[i_press].text.strip())
+
+            # สภาพอากาศ
+            cond_txt = None
+            if i_cond is not None and -len(tds) <= i_cond < len(tds):
+                ctext = tds[i_cond].text.strip()
+                cond_txt = ctext if ctext else None
+            # ถ้าอยากไม่ให้เป็น NULL เลย: เปิดใช้บรรทัดล่าง
+            # if cond_txt is None: cond_txt = "Unknown"
+
+            recs.append({
+                "datetime": dt_local,
+                "temperatureF": temp_f,
+                "humidity_pct": humid,
+                "wind_speed_kmh": wind_kmh,
+                "pressure_in": press_in,
+                "condition": cond_txt,
+            })
+        except Exception:
+            continue
+    return recs
+
+def scrape_last_2_days_and_upload(**_):
+    """Scrape 2 วันล่าสุด → ใส่ Postgres (UPSERT เพื่อเติม condition ได้)"""
+    create_hourly_table_if_not_exists()
+
     today = date.today()
-    # Scrap 2 วัน: วันก่อนหน้า และ วันนี้
-    target_dates = [
-        today - timedelta(days=1),
-        today
-    ]
+    targets = [today - timedelta(days=1), today]
 
-    month_names = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ]
+    opts = Options()
+    opts.add_argument("--headless=new")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
+    opts.add_argument("--disable-gpu")
+    opts.add_argument("--window-size=1200,1600")
+    opts.add_argument("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36")
+    opts.binary_location = "/usr/bin/chromium"
 
-    options = Options()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.binary_location = "/usr/bin/chromium"
-
-    driver = webdriver.Chrome(options=options)
-    wait = WebDriverWait(driver, 15)
+    driver = webdriver.Chrome(options=opts)
+    wait = WebDriverWait(driver, 20)
 
     try:
-        driver.get("https://www.wunderground.com/history/daily/th/mueang-songkhla/VTSS")
-        time.sleep(2)
+        driver.get(WU_URL)
+        time.sleep(1.5)
 
-        all_records = []
-
-        for target_date in target_dates:
-            year = target_date.year
-            month = target_date.month
-            day = target_date.day
-
-            logger.info(f"🔄 เริ่ม scrap วันที่ {target_date}")
-
+        all_vals = []
+        for d in targets:
+            y, m, dd = d.year, d.month, d.day
+            logger.info(f"🔄 Scrape {d.isoformat()}")
             try:
-                # เลือกปี
-                year_select = Select(wait.until(EC.presence_of_element_located((By.ID, "yearSelection"))))
-                year_select.select_by_visible_text(str(year))
-
-                # เลือกเดือน
-                month_select = Select(wait.until(EC.presence_of_element_located((By.ID, "monthSelection"))))
-                month_select.select_by_visible_text(month_names[month - 1])
-
-                # เลือกวัน
-                day_select = Select(wait.until(EC.presence_of_element_located((By.ID, "daySelection"))))
-                day_select.select_by_visible_text(str(day))
-
-                # คลิก submit
-                submit_btn = wait.until(EC.element_to_be_clickable((By.ID, "dateSubmit")))
-                submit_btn.click()
-
-                # รอให้ตารางโหลด
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table tbody tr")))
-
-                # ดึงแถวข้อมูล
-                rows = driver.find_elements(By.CSS_SELECTOR, "table tbody tr")
-                logger.info(f"📊 พบ {len(rows)} แถวในวันที่ {target_date}")
-
-                for r in rows:
-                    cols = r.find_elements(By.TAG_NAME, "td")
-                    if len(cols) >= 10:
-                        try:
-                            time_str = cols[0].text.strip()
-                            temp_f = float(cols[1].text.replace(" °F", "").strip())
-                            humidity = float(cols[3].text.replace(" %", "").strip())
-                            wind = float(cols[5].text.replace(" km/h", "").replace(" mph", "").strip())
-                            pressure = float(cols[7].text.replace(" in", "").strip())
-
-                            # แปลงเวลาเป็น datetime
-                            dt_str = f"{year}-{month:02d}-{day:02d} {time_str}"
-                            dt = datetime.strptime(dt_str, "%Y-%m-%d %I:%M %p")
-
-                            all_records.append({
-                                'datetime': dt,
-                                'temperatureF': temp_f,
-                                'humidity_pct': humidity,
-                                'wind_speed_kmh': wind,
-                                'pressure_in': pressure
-                            })
-                            logger.debug(f"📥 ดึง: {dt} | Temp: {temp_f}°F | Humidity: {humidity}%")
-
-                        except Exception as parse_err:
-                            logger.warning(f"⚠️ ข้ามแถว (parse error): {parse_err}")
-                            continue
-
-                time.sleep(1)
-
+                _select_date(driver, y, m, dd, wait)
             except Exception as e:
-                logger.error(f"❌ ข้อผิดพลาดขณะ scrap วันที่ {target_date}: {e}")
+                logger.error(f"เลือกวันที่ไม่สำเร็จ: {e}")
                 continue
 
-        driver.quit()
+            # รอให้ตารางขึ้น
+            try:
+                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table")))
+            except Exception:
+                logger.warning("ไม่พบตาราง ข้ามวันนี้")
+                continue
 
-        if not all_records:
+            time.sleep(0.8)  # กัน DOM สะบัดเล็กน้อย
+            recs = _parse_rows(driver, d, wait)
+            if not recs:
+                logger.warning("📭 วันนี้ไม่มีแถวข้อมูล")
+                continue
+
+            all_vals += [
+                (r["datetime"], r["temperatureF"], r["humidity_pct"], r["wind_speed_kmh"], r["pressure_in"], r["condition"])
+                for r in recs
+            ]
+
+        if not all_vals:
             logger.warning("⚠️ ไม่พบข้อมูลจาก 2 วันล่าสุด")
             return
 
-        # สร้างตารางหากยังไม่มี
-        create_hourly_table_if_not_exists()
-
-        # บันทึกลงฐานข้อมูล
-        pg_hook = PostgresHook(postgres_conn_id='postgres_default')
-        conn = pg_hook.get_conn()
-        cursor = conn.cursor()
-
-        insert_query = """
+        # UPSERT (ถ้าเคยเก็บไว้แล้วแบบไม่มี condition → เติมให้)
+        upsert_sql = """
             INSERT INTO songkhla_weather_half_hourly
-            (datetime, temperatureF, humidity_pct, wind_speed_kmh, pressure_in)
-            VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (datetime) DO NOTHING;
+            (datetime, temperatureF, humidity_pct, wind_speed_kmh, pressure_in, condition)
+            VALUES (%s,%s,%s,%s,%s,%s)
+            ON CONFLICT (datetime) DO UPDATE SET
+              temperatureF   = COALESCE(EXCLUDED.temperatureF,   songkhla_weather_half_hourly.temperatureF),
+              humidity_pct   = COALESCE(EXCLUDED.humidity_pct,   songkhla_weather_half_hourly.humidity_pct),
+              wind_speed_kmh = COALESCE(EXCLUDED.wind_speed_kmh, songkhla_weather_half_hourly.wind_speed_kmh),
+              pressure_in    = COALESCE(EXCLUDED.pressure_in,    songkhla_weather_half_hourly.pressure_in),
+              condition      = COALESCE(EXCLUDED.condition,      songkhla_weather_half_hourly.condition);
         """
+        hook = PostgresHook(PG_CONN_ID)
+        conn = hook.get_conn()
+        with conn:
+            with conn.cursor() as cur:
+                for i in range(0, len(all_vals), 500):
+                    cur.executemany(upsert_sql, all_vals[i:i+500])
 
-        inserted_count = 0
-        for record in all_records:
-            try:
-                cursor.execute(insert_query, (
-                    record['datetime'],
-                    record['temperatureF'],
-                    record['humidity_pct'],
-                    record['wind_speed_kmh'],
-                    record['pressure_in']
-                ))
-                inserted_count += 1
-            except Exception as db_err:
-                logger.error(f"❌ บันทึกแถวไม่ได้: {db_err}")
+        logger.info(f"✅ Upsert เรียบร้อย: {len(all_vals)} แถว")
 
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        logger.info(f"✅ บันทึกข้อมูลเรียบร้อย: {inserted_count} แถว (ทั้งหมด {len(all_records)} แถว)")
-
-    except Exception as main_err:
-        logger.error(f"💥 เกิดข้อผิดพลาดร้ายแรง: {main_err}")
-        driver.quit()
-        raise
-
+    finally:
+        try:
+            driver.quit()
+        except Exception:
+            pass
 
 # ----------------------------
 # DAG Definition
 # ----------------------------
 default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'email_on_failure': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    "owner": "airflow",
+    "depends_on_past": False,
+    "email_on_failure": False,
+    "retries": 1,
+    "retry_delay": timedelta(minutes=5),
 }
 
 with DAG(
-    'songkhla_weather_half_hourly_automation',
+    dag_id="songkhla_weather_half_hourly_automation",
     default_args=default_args,
-    description='Scrape last 2 days of Songkhla weather (half-hourly raw data) → save to PostgreSQL',
-    schedule_interval='0 */6 * * *',  # รันทุก 6 ชั่วโมง
+    description="Scrape last 2 days (half-hourly) → Postgres, with condition",
+    schedule_interval="0 */6 * * *",
     start_date=datetime(2025, 1, 1),
     catchup=False,
-    tags=['weather', 'songkhla', 'automation', 'half-hourly'],
+    tags=["weather","songkhla","half-hourly"],
 ) as dag:
-
-    scrape_task = PythonOperator(
-        task_id='scrape_last_2_days_and_upload',
+    PythonOperator(
+        task_id="scrape_last_2_days_and_upload",
         python_callable=scrape_last_2_days_and_upload
     )
