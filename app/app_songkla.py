@@ -17,7 +17,7 @@ from sqlalchemy import create_engine, text
 from datetime import date, timedelta
 
 # ----------------------------------------------------------
-# ⚙️ การตั้งค่าฐานข้อมูล
+# Database Configuration
 # ----------------------------------------------------------
 DB_CONFIG = {
     "host": "localhost",
@@ -32,7 +32,7 @@ def get_db_connection():
     return create_engine(conn_str)
 
 # ----------------------------------------------------------
-# 🛣️ รายการทางหลวงในสงขลา
+# Highway List in Songkhla
 # ----------------------------------------------------------
 SONGKHLA_HIGHWAYS = {
     4, 42, 43, 406, 407, 408, 414, 4053, 4054,
@@ -41,7 +41,7 @@ SONGKHLA_HIGHWAYS = {
 }
 
 # ----------------------------------------------------------
-# 🗺️ โหลดกราฟถนน
+# Load Road Graph
 # ----------------------------------------------------------
 @st.cache_resource
 def load_graph():
@@ -51,7 +51,7 @@ def load_graph():
     if os.path.exists(path):
         G = ox.load_graphml(path)
     else:
-        with st.spinner("📦 กำลังดาวน์โหลดข้อมูลถนนสงขลา..."):
+        with st.spinner("Downloading Songkhla road data..."):
             G = ox_graph.graph_from_place("Songkhla Province, Thailand", network_type="drive")
             ox.save_graphml(G, path)
     return G
@@ -61,7 +61,7 @@ def get_map_center():
     return {"center": [7.18, 100.6]}
 
 # ----------------------------------------------------------
-# 🗾 โหลดขอบเขตจังหวัดสงขลา (บนบกเท่านั้น)
+# Load Songkhla Province Boundary (Land Area Only)
 # ----------------------------------------------------------
 @st.cache_data
 def load_boundary():
@@ -71,7 +71,7 @@ def load_boundary():
     if os.path.exists(path):
         return gpd.read_file(path)
 
-    st.info("🌍 กำลังโหลดขอบเขตจังหวัดสงขลาเฉพาะบนบก (ครั้งแรกอาจใช้เวลา 1-2 นาที)...")
+    st.info("Loading Songkhla province land boundary (this may take 1–2 minutes for the first time)...")
 
     bbox = (99.8, 6.3, 101.3, 7.8)
     url = "https://osmdata.openstreetmap.de/download/land-polygons-split-4326.zip"
@@ -112,7 +112,7 @@ def load_boundary():
     return boundary_no_sea
 
 # ----------------------------------------------------------
-# 📊 ดึงข้อมูลความเสี่ยงสำหรับวันที่ที่เลือก
+# Load Risk Data for Selected Date
 # ----------------------------------------------------------
 @st.cache_data(ttl=300)
 def load_road_risk_for_date(target_date: date):
@@ -128,11 +128,11 @@ def load_road_risk_for_date(target_date: date):
                 risk_map[int(row["road"])] = float(row["pct"])
         return risk_map
     except Exception as e:
-        st.warning(f"⚠️ ไม่พบข้อมูลความเสี่ยงสำหรับวันที่ {target_date}")
+        st.warning(f"No risk data found for {target_date}")
         return {}
 
 # ----------------------------------------------------------
-# 🔍 ดึงหมายเลขถนนจาก ref
+# Extract Road Numbers from Ref
 # ----------------------------------------------------------
 def extract_road_numbers_from_ref(ref_str):
     if not ref_str or str(ref_str).lower() in ["nan", "none", "", "null"]:
@@ -149,7 +149,7 @@ def extract_road_numbers_from_ref(ref_str):
     return numbers
 
 # ----------------------------------------------------------
-# 📊 วิเคราะห์เส้นทาง
+# Route Analysis
 # ----------------------------------------------------------
 def analyze_route_final(G, route, risk_map):
     total_length = 0.0
@@ -198,10 +198,10 @@ def analyze_route_final(G, route, risk_map):
     }
 
 # ----------------------------------------------------------
-# 🎨 UI หลัก
+# Main UI
 # ----------------------------------------------------------
-st.set_page_config(page_title="🛣️ Highway Risk Analyzer (สงขลา)", layout="wide")
-st.title("🛣️ วิเคราะห์เส้นทางและความเสี่ยงทางหลวง (สงขลา)")
+st.set_page_config(page_title="Highway Risk Analyzer (Songkhla)", layout="wide")
+st.title("Highway Risk Analyzer (Songkhla)")
 
 G = load_graph()
 boundary = load_boundary()
@@ -219,7 +219,7 @@ if "show_boundary" not in st.session_state:
 col_map, col_ctrl = st.columns([3, 1])
 
 # ----------------------------------------------------------
-# 🗺️ แผนที่
+# Map Display
 # ----------------------------------------------------------
 with col_map:
     m = folium.Map(location=map_info["center"], zoom_start=10)
@@ -228,11 +228,11 @@ with col_map:
         folium.GeoJson(
             boundary.__geo_interface__,
             style_function=lambda x: {"color": "black", "fill": False, "weight": 2},
-            tooltip="ขอบเขตจังหวัดสงขลา (บนบก)"
+            tooltip="Songkhla Province Boundary (Land Only)"
         ).add_to(m)
 
     colors = ["green", "red"]
-    labels = ["🚩 จุดเริ่มต้น", "🏁 จุดปลายทาง"]
+    labels = ["Start Point", "End Point"]
     for i, p in enumerate(st.session_state["points"]):
         folium.Marker(
             [p["lat"], p["lng"]],
@@ -248,30 +248,28 @@ with col_map:
     out = st_folium(m, width="100%", height=600, key="main_map")
 
 # ----------------------------------------------------------
-# 🎛️ ควบคุม
+# Controls
 # ----------------------------------------------------------
 with col_ctrl:
-    st.subheader("📍 ปัก 2 จุดเพื่อวิเคราะห์เส้นทาง")
+    st.subheader("Mark 2 Points to Analyze the Route")
 
-    # 📅 ปฎิทินเลือกวันที่
     today = date.today()
     max_date = today + timedelta(days=30)
     selected_date = st.date_input(
-        "📅 เลือกวันที่สำหรับวิเคราะห์ความเสี่ยง:",
+        "Select a date for risk analysis:",
         value=today,
         min_value=today,
         max_value=max_date,
         key="selected_date"
     )
 
-    # ✅ Checkbox ขอบเขต
     show_boundary = st.checkbox(
-        "แสดงขอบเขตจังหวัดสงขลา (บนบก)",
+        "Show Songkhla Province Boundary (Land Only)",
         value=st.session_state.get("show_boundary", True),
         key="show_boundary"
     )
 
-    if st.button("🗑️ ล้างแผนที่", type="secondary", use_container_width=True):
+    if st.button("Clear Map", type="secondary", use_container_width=True):
         st.session_state["points"] = []
         st.session_state["route_coords"] = None
         st.session_state["analysis"] = None
@@ -283,7 +281,7 @@ with col_ctrl:
         point = Point(lng, lat)
 
         if not boundary.unary_union.contains(point):
-            st.warning("ตำแหน่งนี้อยู่นอกพื้นที่จังหวัดสงขลา")
+            st.warning("This point is outside Songkhla Province.")
         else:
             try:
                 nearest_node = ox.distance.nearest_nodes(G, lng, lat)
@@ -295,23 +293,23 @@ with col_ctrl:
                 st.session_state["analysis"] = None
                 st.rerun()
             except Exception:
-                st.warning("⚠️ ไม่สามารถปักหมุดตรงนี้ได้ (อยู่นอกเครือข่ายถนน)")
+                st.warning("Unable to place a marker here (outside the road network).")
 
     if st.session_state["points"]:
-        st.write(f"ปักแล้ว: {len(st.session_state['points'])}/2 จุด")
+        st.write(f"Marked: {len(st.session_state['points'])}/2 points")
         for i, p in enumerate(st.session_state["points"]):
             st.text(f"{labels[i]}: {p['lat']:.5f}, {p['lng']:.5f}")
 
     if len(st.session_state["points"]) == 2 and st.session_state["route_coords"] is None:
         try:
-            with st.spinner(f"🧭 กำลังวิเคราะห์เส้นทางสำหรับวันที่ {selected_date}..."):
+            with st.spinner(f"Analyzing route for {selected_date}..."):
                 p1, p2 = st.session_state["points"]
                 orig = ox.distance.nearest_nodes(G, p1["lng"], p1["lat"])
                 dest = ox.distance.nearest_nodes(G, p2["lng"], p2["lat"])
 
                 route = ox.shortest_path(G, orig, dest, weight="length")
                 if route is None:
-                    raise Exception("ไม่พบเส้นทาง")
+                    raise Exception("Route not found")
 
                 risk_map = load_road_risk_for_date(selected_date)
                 analysis_result = analyze_route_final(G, route, risk_map)
@@ -330,29 +328,29 @@ with col_ctrl:
                 st.session_state["analysis"] = analysis_result
                 st.rerun()
         except Exception as e:
-            st.error(f"❌ ข้อผิดพลาด: {str(e)}")
+            st.error(f"Error: {str(e)}")
 
     if st.session_state["analysis"]:
         a = st.session_state["analysis"]
         target_date = a["target_date"]
-        st.success(f"✅ วิเคราะห์เส้นทางสำหรับวันที่ {target_date} เรียบร้อย!")
+        st.success(f"Route analysis for {target_date} completed successfully!")
         
         total_km = a['total_length'] / 1000
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("📏 ระยะทางรวม", f"{total_km:.2f} กม.")
+            st.metric("Total Distance", f"{total_km:.2f} km")
         with col2:
-            st.metric("⚠️ ความเสี่ยงโดยรวม", f"{a['total_risk']:.1f}%")
+            st.metric("Overall Risk", f"{a['total_risk']:.1f}%")
         
-        with st.expander("ดูรายละเอียดการใช้ทางหลวง", expanded=False):
+        with st.expander("View Highway Usage Details", expanded=False):
             if a["highway_length_by_number"]:
-                st.markdown("### ระยะทางตามหมายเลขทางหลวง")
+                st.markdown("### Distance by Highway Number")
                 for road_num, length_m in sorted(a["highway_length_by_number"].items()):
                     length_km = length_m / 1000
-                    st.write(f"- **ทางหลวงหมายเลข {road_num}**: {length_km:.2f} กม.")
+                    st.write(f"- **Highway No. {road_num}**: {length_km:.2f} km")
             else:
-                st.write("ไม่พบการใช้ทางหลวงหมายเลข")
+                st.write("No numbered highways found in route.")
             
             local_km = a['local_length'] / 1000
-            st.write(f"**ถนนทั่วไป (ไม่นับความเสี่ยง)**: {local_km:.2f} กม.")
-            st.caption("ℹ️ ความเสี่ยงคำนวณเฉพาะจากทางหลวงที่มีข้อมูลในระบบ")
+            st.write(f"**Local Roads (No Risk Calculation)**: {local_km:.2f} km")
+            st.caption("Note: Risk is calculated only from highways with available data.")
