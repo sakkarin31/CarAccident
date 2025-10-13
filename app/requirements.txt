@@ -9,3 +9,4 @@ pandas>=1.5
 shapely>=2.0
 rtree; extra == "rtree"  # optional but recommended
 streamlit-folium>=0.11
+sqlalchemy 
