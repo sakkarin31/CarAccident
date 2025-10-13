@@ -188,15 +188,54 @@ def _parse_rows(driver, base_date: date, wait: WebDriverWait):
 # ==============================
 # MAIN TASK
 # ==============================
-def scrape_missing_days_and_upload(**_):
-    create_hourly_table_if_not_exists()
-    range_to_scrape = get_date_range_to_scrape()
-    if not range_to_scrape:
-        logger.info("✅ ข้อมูลปีปัจจุบันครบถึงวันนี้แล้ว ไม่ต้อง scrape เพิ่ม")
-        return
+def get_missing_date_ranges():
+    """
+    คืนรายการช่วงวันที่ที่ 'ขาด' จากฐานข้อมูลในปีปัจจุบัน
+    เช่น [(2025-03-05, 2025-03-06), (2025-09-01, 2025-09-03)]
+    """
+    pg = PostgresHook(postgres_conn_id=PG_CONN_ID)
+    conn = pg.get_conn()
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT DISTINCT DATE(datetime)
+            FROM songkhla_weather_half_hourly
+            WHERE EXTRACT(YEAR FROM datetime) = EXTRACT(YEAR FROM CURRENT_DATE)
+            ORDER BY 1;
+        """)
+        existing_dates = [r[0] for r in cur.fetchall()]
 
-    start_date, end_date = range_to_scrape
-    logger.info(f"📆 เติมข้อมูลจาก {start_date} ถึง {end_date}")
+    current_year = date.today().year
+    start_date = date(current_year, 1, 1)
+    today = date.today()
+
+    all_dates = [start_date + timedelta(days=i) for i in range((today - start_date).days + 1)]
+    missing = [d for d in all_dates if d not in existing_dates]
+
+    if not missing:
+        logger.info("✅ ไม่มีวันขาด ข้อมูลปีนี้ครบทุกวันแล้ว")
+        return []
+
+    # รวมวันต่อเนื่องเป็นช่วง (start, end)
+    missing_ranges = []
+    start = prev = missing[0]
+    for d in missing[1:]:
+        if (d - prev).days > 1:
+            missing_ranges.append((start, prev))
+            start = d
+        prev = d
+    missing_ranges.append((start, prev))
+
+    logger.info(f"🟡 พบช่วงวันขาด {len(missing_ranges)} ช่วง: {missing_ranges[:5]}{' ...' if len(missing_ranges) > 5 else ''}")
+    return missing_ranges
+
+
+def scrape_missing_days_and_upload(**_):
+    """ตรวจว่าข้อมูลขาดวันไหน → สแครปเฉพาะวันเหล่านั้น"""
+    create_hourly_table_if_not_exists()
+    missing_ranges = get_missing_date_ranges()
+    if not missing_ranges:
+        logger.info("✅ ไม่มีช่วงวันขาด ไม่ต้อง scrape เพิ่ม")
+        return
 
     hook = PostgresHook(PG_CONN_ID)
     conn = hook.get_conn()
@@ -232,35 +271,36 @@ def scrape_missing_days_and_upload(**_):
 
         with conn:
             with conn.cursor() as cur:
-                d = start_date
-                while d <= end_date:
-                    logger.info(f"🔄 Scrape {d.isoformat()}")
-                    try:
-                        _select_date(driver, d.year, d.month, d.day, wait)
-                        recs = _parse_rows(driver, d, wait)
-                        if recs:
-                            day_vals = sorted([
-                                (
-                                    r["datetime"],
-                                    r["temperatureF"],
-                                    r["humidity_pct"],
-                                    r["wind_speed_kmh"],
-                                    r["pressure_in"],
-                                    r["condition"]
-                                )
-                                for r in recs
-                            ], key=lambda x: x[0])
-                            cur.executemany(upsert_sql, day_vals)
-                            conn.commit()
-                            logger.info(f"✅ บันทึก {len(day_vals)} แถวสำหรับวันที่ {d}")
-                        else:
-                            logger.warning(f"📭 ไม่มีข้อมูลในวันที่ {d}")
-                    except Exception as e:
-                        logger.warning(f"⚠️ วันที่ {d} มีปัญหา: {e}")
-                        conn.rollback()
+                for start_date, end_date in missing_ranges:
+                    d = start_date
+                    while d <= end_date:
+                        logger.info(f"🔄 Scrape {d.isoformat()}")
+                        try:
+                            _select_date(driver, d.year, d.month, d.day, wait)
+                            recs = _parse_rows(driver, d, wait)
+                            if recs:
+                                day_vals = sorted([
+                                    (
+                                        r["datetime"],
+                                        r["temperatureF"],
+                                        r["humidity_pct"],
+                                        r["wind_speed_kmh"],
+                                        r["pressure_in"],
+                                        r["condition"]
+                                    )
+                                    for r in recs
+                                ], key=lambda x: x[0])
+                                cur.executemany(upsert_sql, day_vals)
+                                conn.commit()
+                                logger.info(f"✅ บันทึก {len(day_vals)} แถวสำหรับวันที่ {d}")
+                            else:
+                                logger.warning(f"📭 ไม่มีข้อมูลในวันที่ {d}")
+                        except Exception as e:
+                            logger.warning(f"⚠️ วันที่ {d} มีปัญหา: {e}")
+                            conn.rollback()
 
-                    d += timedelta(days=1)
-                    time.sleep(SLEEP_BETWEEN_DAYS)
+                        d += timedelta(days=1)
+                        time.sleep(SLEEP_BETWEEN_DAYS)
 
     finally:
         try:
@@ -270,7 +310,6 @@ def scrape_missing_days_and_upload(**_):
         conn.close()
 
     logger.info("✅ งานรอบนี้เสร็จสิ้น")
-
 
 # ==============================
 # DAG Definition
