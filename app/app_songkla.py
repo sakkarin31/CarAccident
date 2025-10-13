@@ -17,6 +17,13 @@ from sqlalchemy import create_engine, text
 from datetime import date, timedelta
 
 # ----------------------------------------------------------
+# หา base directory ของไฟล์นี้ (ไม่ว่าจะรันจากไหนก็ตาม)
+# ----------------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# ----------------------------------------------------------
 # Database Configuration
 # ----------------------------------------------------------
 DB_CONFIG = {
@@ -45,8 +52,6 @@ SONGKHLA_HIGHWAYS = {
 # ----------------------------------------------------------
 @st.cache_resource
 def load_graph():
-    DATA_DIR = "data"
-    os.makedirs(DATA_DIR, exist_ok=True)
     path = os.path.join(DATA_DIR, "songkhla.graphml")
     if os.path.exists(path):
         G = ox.load_graphml(path)
@@ -65,8 +70,6 @@ def get_map_center():
 # ----------------------------------------------------------
 @st.cache_data
 def load_boundary():
-    DATA_DIR = "data"
-    os.makedirs(DATA_DIR, exist_ok=True)
     path = os.path.join(DATA_DIR, "songkhla_boundary_auto.geojson")
     if os.path.exists(path):
         return gpd.read_file(path)
