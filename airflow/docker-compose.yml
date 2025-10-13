@@ -23,6 +23,8 @@ x-airflow-common: &airflow-common
     - ./plugins:/opt/airflow/plugins
     - ./data:/opt/airflow/data
     - ./requirements.txt:/requirements.txt
+    - ./spark:/opt/airflow/spark   # 👈 Add this line
+    - ./model:/opt/airflow/model   # 👈 Add this line
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     - postgres

@@ -12,6 +12,7 @@ scikit-learn
 lightgbm
 xgboost
 joblib
+tensorflow>=2.13.0
 
 # Database & Spark
 psycopg2-binary
