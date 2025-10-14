@@ -15,7 +15,7 @@ print(f"🔍 Checking files in {MODEL_DIR}:")
 print(os.listdir(MODEL_DIR))
 print("📁 outputs folder contents:", os.listdir(os.path.join(MODEL_DIR, "outputs")))
 
-model = load_model(os.path.join(MODEL_DIR, "outputs", "lstm_multivariate_2024.keras"))
+model = load_model(os.path.join(MODEL_DIR, "outputs", "lstm_multivariate_3outputs.keras"))
 scaler_X = joblib.load(os.path.join(MODEL_DIR, "outputs", "feature_scaler.pkl"))
 scaler_y = joblib.load(os.path.join(MODEL_DIR, "outputs", "target_scaler.pkl"))
 
