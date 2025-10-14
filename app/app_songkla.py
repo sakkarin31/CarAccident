@@ -28,18 +28,35 @@ os.makedirs(DATA_DIR, exist_ok=True)
 # DB Config
 # ----------------------------------------------------------
 DB_CONFIG = {
-    "host": "localhost",
-    "port": 5433,
-    "database": "airflow",
-    "user": "airflow",
-    "password": "airflow",
+    "host": os.getenv("DB_HOST", "postgres"),  # ✅ ใช้ชื่อ service จาก docker-compose.yml
+    "port": int(os.getenv("DB_PORT", "5432")),  # ✅ 5432 ไม่ใช่ 5433
+    "database": os.getenv("DB_NAME", "airflow"),
+    "user": os.getenv("DB_USER", "airflow"),
+    "password": os.getenv("DB_PASSWORD", "airflow"),
 }
 def get_db_connection():
+    """Create SQLAlchemy engine with retry logic."""
+    from sqlalchemy.exc import OperationalError
+    import time
+
     conn_str = (
-        f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}"
+        f"postgresql+psycopg2://{DB_CONFIG['user']}:{DB_CONFIG['password']}"
         f"@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}"
     )
-    return create_engine(conn_str)
+
+    # ลองเชื่อมต่อใหม่สูงสุด 5 ครั้ง
+    for attempt in range(5):
+        try:
+            engine = create_engine(conn_str)
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            print(f"✅ Connected to PostgreSQL at {DB_CONFIG['host']}:{DB_CONFIG['port']}")
+            return engine
+        except OperationalError as e:
+            print(f"⚠️ DB not ready yet (attempt {attempt+1}/5): {e}")
+            time.sleep(3)
+    st.error("❌ Could not connect to PostgreSQL after 5 attempts.")
+    raise
 
 # ----------------------------------------------------------
 # Highway numbers we track risk for
@@ -191,20 +208,38 @@ def load_boundary():
 # ----------------------------------------------------------
 @st.cache_data(ttl=300)
 def load_road_risk_for_date(target_date: date):
+    """
+    โหลดข้อมูลความเสี่ยงจากตาราง db_result_model 
+    และคืนค่าเป็น dict {road_number: predicted_probability}
+    """
     try:
         engine = get_db_connection()
-        query = text("SELECT road, pct FROM db_result_model WHERE date = :target_date")
-        df = pd.read_sql(query, engine, params={"target_date": target_date})
-        df["road"] = pd.to_numeric(df["road"], errors="coerce")
-        risk_map = {}
-        for _, row in df.iterrows():
-            if pd.notna(row["road"]):
-                risk_map[int(row["road"])] = float(row["pct"])
-        return risk_map
-    except Exception:
-        st.warning(f"No risk data found for {target_date}")
-        return {}
 
+        query = text("""
+            SELECT road, predicted_probability
+            FROM db_result_model
+            WHERE DATE(date) = :target_date
+        """)
+        df = pd.read_sql(query, engine, params={"target_date": target_date})
+
+        if df.empty:
+            st.warning(f"⚠️ No risk data found for {target_date}")
+            return {}
+
+        df["road"] = pd.to_numeric(df["road"], errors="coerce")
+        df["predicted_probability"] = pd.to_numeric(df["predicted_probability"], errors="coerce")
+
+        risk_map = {
+            int(row["road"]): float(row["predicted_probability"])
+            for _, row in df.dropna(subset=["road", "predicted_probability"]).iterrows()
+        }
+
+        st.success(f"✅ Loaded {len(risk_map)} road risk records for {target_date}")
+        return risk_map
+
+    except Exception as e:
+        st.error(f"❌ Error loading risk data: {e}")
+        return {}
 # ----------------------------------------------------------
 # Utilities
 # ----------------------------------------------------------
@@ -268,6 +303,32 @@ def analyze_route_final(G, route, risk_map):
         "local_length": local_length,
     }
 
+def classify_risk(prob):
+    """Return risk level label and color for display"""
+    if prob is None or np.isnan(prob):
+        return "Unknown", "gray"
+    if prob < 0.05:
+        return "Low", "green"
+    elif prob < 0.20:
+        return "Medium", "yellow"
+    elif prob < 0.50:
+        return "High", "orange"
+    else:
+        return "Very High", "red"
+    
+def get_edge_color(prob):
+    """Return color hex based on risk probability"""
+    if prob is None or np.isnan(prob):
+        return "#999999"  # เทา
+    if prob < 0.05:
+        return "#2ecc71"  # เขียว
+    elif prob < 0.20:
+        return "#f1c40f"  # เหลือง
+    elif prob < 0.50:
+        return "#e67e22"  # ส้ม
+    else:
+        return "#e74c3c"  # แดง
+    
 # ----------------------------------------------------------
 # UI
 # ----------------------------------------------------------
@@ -428,7 +489,25 @@ with col_ctrl:
         with col1:
             st.metric("Total Distance", f"{total_km:.2f} km")
         with col2:
-            st.metric("Overall Risk", f"{a['total_risk']:.1f}%")
+            risk_label, risk_color = classify_risk(a['total_risk'])
+            risk_percent = a['total_risk'] * 100
+
+            st.markdown(
+            f"""
+            <div style="
+                padding:10px;
+                border-radius:10px;
+                background-color:{risk_color};
+                color:white;
+                text-align:center;
+                margin-bottom:15px;
+            ">
+                <h4 style="margin:0; font-size:24px;">Overall Risk: {risk_label}</h4>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
 
         with st.expander("View Highway Usage Details", expanded=False):
             if a["highway_length_by_number"]:
