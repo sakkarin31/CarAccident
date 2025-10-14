@@ -99,25 +99,27 @@ def gate_all_ready(**context) -> bool:
     return aadt_ok and acc_ok and wea_ok
 
 def check_update(**context):
-    """
-    ตรวจสอบว่ามีข้อมูลใหม่ของปีที่แล้วครบหรือยัง
-    ถ้ามีครบแล้วให้ return 'forecast_pipeline'
-    ถ้ายังไม่ครบให้ return 'clean_pipeline'
-    """
     y = target_year(context["logical_date"])
     hook = PostgresHook(PG_CONN_ID)
-    aadt_ok = is_aadt_ready(y, hook)
-    acc_ok  = is_accident_ready(y, hook)
-    wea_ok  = is_weather_ready(y, hook)
 
-    print(f"[check_update] year={y}, aadt={aadt_ok}, accident={acc_ok}, weather={wea_ok}")
+    # นับแถวปีล่าสุด
+    result = hook.get_first(
+        f"SELECT COUNT(*) FROM {TARGET_TABLE} WHERE EXTRACT(YEAR FROM date) = {y}"
+    )
+    n_rows = result[0] if result else 0
 
-    if aadt_ok and acc_ok and wea_ok:
-        print("✅ All data ready, run forecast pipeline directly.")
-        return "forecast_pipeline"
+    print(f"[check_update] year={y}, rows_in_table={n_rows}")
+
+    if n_rows > 0:
+        print("✅ Data for last year exists. Run forecast pipeline.")
+        # return task_id แบบเต็ม
+        return "forecast_pipeline.run_last30_weather"
     else:
-        print("⏳ Data not ready, run cleaning first then forecast.")
-        return "clean_pipeline"
+        print("⏳ Data for last year not found. Run cleaning pipeline first.")
+        return "clean_pipeline.gate_all_sources_ready_for_prev_year"
+
+
+
 
 # -----------------------------
 # Load FINAL → Postgres
@@ -303,13 +305,13 @@ with DAG(
 
         run_lstm_model = PythonOperator(
             task_id="run_lstm_model",
-            python_callable=run_spark_job,
+            python_callable=run_python_script,
             op_args=[os.path.join(SPARK_FOLDER, "lstm.py")],
         )
 
         run_predict_acc = PythonOperator(
             task_id="run_predict_acc",
-            python_callable=run_spark_job,
+            python_callable=run_python_script,
             op_args=[os.path.join(SPARK_FOLDER, "predict_acc.py")],
         )
 
@@ -320,5 +322,9 @@ with DAG(
 
     # ---------- DAG FLOW ----------
     start >> t_check_update
-    t_check_update >> clean_pipeline >> forecast_pipeline >> end_task
-    t_check_update >> forecast_pipeline >> end_task
+    t_check_update >> clean_pipeline
+    t_check_update >> forecast_pipeline
+
+    # แล้วเชื่อมแต่ละ branch ไปยัง end_task
+    clean_pipeline >> end_task
+    forecast_pipeline >> end_task

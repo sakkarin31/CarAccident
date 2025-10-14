@@ -9,78 +9,73 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# --- CONFIG ---
+PG_CONN_ID = 'postgres_default'
+TARGET_TABLE = 'songkhla_daily_clean'
+
 # หา path ของไฟล์ CSV
 DAGS_FOLDER = os.path.dirname(__file__)
 CSV_FILE_PATH = os.path.join(DAGS_FOLDER, 'data', 'cleandaily-all-years.csv')
 
-def create_dataset_table_if_not_exists():
-    """สร้างตาราง dataset หากยังไม่มี"""
-    pg_hook = PostgresHook(postgres_conn_id='postgres_default')
-    conn = pg_hook.get_conn()
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS dataset (
-            id SERIAL PRIMARY KEY,
-            datetime DATE,
-            accident INTEGER,
-            temperature_f NUMERIC(8, 4),
-            humidity_pct NUMERIC(8, 4),
-            pressure_in NUMERIC(8, 4),
-            vehicles_lt_4_wheels NUMERIC(10, 2),
-            vehicles_4_wheels NUMERIC(10, 2),
-            vehicles_gt_4_wheels NUMERIC(10, 2),
-            day_of_week INTEGER,
-            is_weekend BOOLEAN,
-            is_holiday BOOLEAN,
-            year INTEGER,
-            created_at TIMESTAMP DEFAULT NOW(),
-            UNIQUE(datetime)
+# ------------------------------
+# CREATE TABLE IF NOT EXISTS
+# ------------------------------
+def create_target_table_if_not_exists():
+    """สร้างตาราง songkhla_daily_clean หากยังไม่มี"""
+    hook = PostgresHook(PG_CONN_ID)
+    hook.run(f"""
+        CREATE TABLE IF NOT EXISTS {TARGET_TABLE} (
+            date              DATE PRIMARY KEY,
+            temperature_f     DOUBLE PRECISION,
+            humidity_pct      DOUBLE PRECISION,
+            pressure_in       DOUBLE PRECISION,
+            accidents         INTEGER,
+            vehicles_lt_4     INTEGER,
+            vehicles_eq_4     INTEGER,
+            vehicles_gt_4     INTEGER,
+            day_of_week       SMALLINT,
+            is_weekend        BOOLEAN,
+            is_holiday        BOOLEAN,
+            year              INTEGER,
+            created_at        TIMESTAMP DEFAULT NOW()
         );
     """)
-    conn.commit()
-    cursor.close()
-    conn.close()
-    logger.info("✅ ตาราง 'dataset' ถูกตรวจสอบ/สร้างเรียบร้อยแล้ว")
+    logger.info(f"✅ ตาราง '{TARGET_TABLE}' ถูกตรวจสอบ/สร้างเรียบร้อยแล้ว")
 
+# ------------------------------
+# LOAD CSV TO POSTGRES
+# ------------------------------
 def load_csv_to_postgres():
     """อ่านไฟล์ CSV และ insert ลง PostgreSQL"""
-    pg_hook = PostgresHook(postgres_conn_id='postgres_default')
+    pg_hook = PostgresHook(PG_CONN_ID)
     conn = pg_hook.get_conn()
     cursor = conn.cursor()
 
-    with open(CSV_FILE_PATH, mode='r', encoding='utf-8-sig') as csvfile:  # <-- เปลี่ยนตรงนี้
+    with open(CSV_FILE_PATH, mode='r', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             try:
-                cursor.execute("""
-                    INSERT INTO dataset (
-                        datetime, accident, temperature_f, humidity_pct, pressure_in,
-                        vehicles_lt_4_wheels, vehicles_4_wheels, vehicles_gt_4_wheels,
+                cursor.execute(f"""
+                    INSERT INTO {TARGET_TABLE} (
+                        date, temperature_f, humidity_pct, pressure_in,
+                        accidents, vehicles_lt_4, vehicles_eq_4, vehicles_gt_4,
                         day_of_week, is_weekend, is_holiday, year
-                    ) VALUES (
-                        %(datetime)s,
-                        %(accident)s,
-                        %(temperature_f)s,
-                        %(humidity_pct)s,
-                        %(pressure_in)s,
-                        %(vehicles_lt_4_wheels)s,
-                        %(vehicles_4_wheels)s,
-                        %(vehicles_gt_4_wheels)s,
-                        %(day_of_week)s,
-                        %(is_weekend)s::BOOLEAN,
-                        %(is_holiday)s::BOOLEAN,
-                        %(year)s
                     )
-                    ON CONFLICT (datetime) DO NOTHING;
+                    VALUES (
+                        %(date)s, %(temperature_f)s, %(humidity_pct)s, %(pressure_in)s,
+                        %(accidents)s, %(vehicles_lt_4)s, %(vehicles_eq_4)s, %(vehicles_gt_4)s,
+                        %(day_of_week)s, %(is_weekend)s::BOOLEAN, %(is_holiday)s::BOOLEAN, %(year)s
+                    )
+                    ON CONFLICT (date) DO NOTHING;
                 """, {
-                    'datetime': row['datetime'],  # ตอนนี้จะใช้ได้แล้ว
-                    'accident': int(float(row['เกิดเหตุ'])),
+                    'date': row['datetime'],
                     'temperature_f': float(row['temperature_F']),
                     'humidity_pct': float(row['humidity_%']),
                     'pressure_in': float(row['pressure_in']),
-                    'vehicles_lt_4_wheels': float(row['vehicles_lt_4_wheels']),
-                    'vehicles_4_wheels': float(row['vehicles_4_wheels']),
-                    'vehicles_gt_4_wheels': float(row['vehicles_gt_4_wheels']),
+                    'accidents': int(float(row['เกิดเหตุ'])),
+                    'vehicles_lt_4': int(float(row['vehicles_lt_4_wheels'])),
+                    'vehicles_eq_4': int(float(row['vehicles_4_wheels'])),
+                    'vehicles_gt_4': int(float(row['vehicles_gt_4_wheels'])),
                     'day_of_week': int(row['day_of_week']),
                     'is_weekend': 'true' if int(row['is_weekend']) == 1 else 'false',
                     'is_holiday': 'true' if int(row['is_holiday']) == 1 else 'false',
@@ -94,9 +89,11 @@ def load_csv_to_postgres():
     conn.commit()
     cursor.close()
     conn.close()
-    logger.info("✅ โหลดข้อมูลจาก CSV เข้าสู่ตาราง 'dataset' เรียบร้อยแล้ว")
+    logger.info(f"✅ โหลดข้อมูลจาก CSV เข้าสู่ตาราง '{TARGET_TABLE}' เรียบร้อยแล้ว")
 
-# --- DAG Definition ---
+# ------------------------------
+# DAG Definition
+# ------------------------------
 default_args = {
     'owner': 'airflow',
     'start_date': days_ago(1),
@@ -106,13 +103,13 @@ dag = DAG(
     'load_daily_dataset_to_postgres',
     default_args=default_args,
     description='โหลดข้อมูล daily จาก CSV เข้า PostgreSQL',
-    schedule_interval=None,  # รันด้วยตนเอง หรือเปลี่ยนตามต้องการ
+    schedule_interval=None,
     catchup=False,
 )
 
 create_table_task = PythonOperator(
-    task_id='create_dataset_table',
-    python_callable=create_dataset_table_if_not_exists,
+    task_id='create_target_table',
+    python_callable=create_target_table_if_not_exists,
     dag=dag,
 )
 

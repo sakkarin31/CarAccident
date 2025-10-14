@@ -21,7 +21,7 @@ x-airflow-common: &airflow-common
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
-    - ./data:/opt/airflow/data
+    - ./data:/opt/airflow/dags/data
     - ./requirements.txt:/requirements.txt
     - ./spark:/opt/airflow/spark   # 👈 Add this line
     - ./model:/opt/airflow/model   # 👈 Add this line

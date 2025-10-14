@@ -160,4 +160,3 @@ cursor.close()
 conn.close()
 
 print("✅ Forecast saved to PostgreSQL table: forecast_weather!")
-result_df.to_csv('/opt/airflow/data/30day_weather_forecast.csv', index=False)
