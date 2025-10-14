@@ -18,13 +18,13 @@ os.makedirs('outputs', exist_ok=True)
 # -------------------------------------------------
 # 2. โหลดข้อมูล
 # -------------------------------------------------
-df = pd.read_csv(r'C:\Work\CarAccident\dataset\cleandaily-all-years.csv')
+df = pd.read_csv(r'C:\6610110050\CarAccident\dataset\cleandaily-all-years.csv')
 df['datetime'] = pd.to_datetime(df['datetime'])
 df = df.sort_values('datetime').reset_index(drop=True)
 
 # กำหนดฟีเจอร์และ target (ทั้ง 4 ตัว)
 features = ['temperature_F', 'humidity_%', 'wind_speed_kmh', 'pressure_in']
-targets = features  # ทำนายทั้ง 4 ตัว
+targets = ['temperature_F', 'humidity_%', 'pressure_in']
 
 print("📅 ช่วงเวลาข้อมูล:")
 print(f"   ปี: {df['year'].min()} – {df['year'].max()}")
@@ -120,7 +120,7 @@ history = model.fit(
 )
 
 # บันทึกโมเดล
-model.save('outputs/lstm_multivariate_4outputs.keras')
+model.save('outputs/lstm_multivariate_3outputs.keras')
 print("\n✅ บันทึกโมเดลเรียบร้อย!")
 
 # -------------------------------------------------

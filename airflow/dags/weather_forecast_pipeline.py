@@ -8,7 +8,7 @@ import subprocess
 # Path configuration
 # -----------------------------
 DAGS_FOLDER = os.path.dirname(__file__)
-TASKS_FOLDER = os.path.join(DAGS_FOLDER, "tasks")
+TASKS_FOLDER = os.path.join(DAGS_FOLDER, "load_data")
 SPARK_FOLDER = "/opt/airflow/spark/application/spark_jobs"  # ตำแหน่งของ lstm.py และ predict_acc.py
 
 # -----------------------------
