@@ -328,39 +328,40 @@ with col_ctrl:
     max_date = today + timedelta(days=30)
     selected_date = st.date_input(
         "Select a date for risk analysis:",
-        value=today,
+        value=st.session_state.get("selected_date", today),
         min_value=today,
         max_value=max_date,
-        key="selected_date",
+        key="selected_date"
     )
 
     show_boundary = st.checkbox(
         "Show Songkhla Province Boundary (Land Only)",
         value=st.session_state.get("show_boundary", True),
-        key="show_boundary",
+        key="show_boundary"
     )
 
     if st.button("Clear Map", type="secondary", use_container_width=True):
         st.session_state["points"] = []
         st.session_state["route_coords"] = None
+        st.session_state["route_nodes"] = None
         st.session_state["analysis"] = None
         st.rerun()
 
-    # Place markers by clicking (max 2)
+    # ----- 1️⃣ ปักหมุดได้สูงสุด 2 จุด -----
     if out and out.get("last_clicked") and len(st.session_state["points"]) < 2:
         lat = out["last_clicked"]["lat"]
         lng = out["last_clicked"]["lng"]
-        pt = Point(lng, lat)
+        point = Point(lng, lat)
 
-        if not boundary.unary_union.contains(pt):
+        if not boundary.unary_union.contains(point):
             st.warning("This point is outside Songkhla Province.")
         else:
             try:
-                # NOTE: nearest_nodes expects (x,y) = (lon,lat)
                 nearest_node = ox.distance.nearest_nodes(G, lng, lat)
-                ndata = G.nodes[nearest_node]
-                st.session_state["points"].append({"lat": ndata["y"], "lng": ndata["x"]})
+                nearest_point = G.nodes[nearest_node]
+                st.session_state["points"].append({"lat": nearest_point["y"], "lng": nearest_point["x"]})
                 st.session_state["route_coords"] = None
+                st.session_state["route_nodes"] = None
                 st.session_state["analysis"] = None
                 st.rerun()
             except Exception as e:
@@ -369,24 +370,37 @@ with col_ctrl:
     if st.session_state["points"]:
         st.write(f"Marked: {len(st.session_state['points'])}/2 points")
         for i, p in enumerate(st.session_state["points"]):
-            st.text(f"{labels[i]}: {p['lat']:.5f}, {p['lng']:.5f}")
+            st.text(f"{['Start','End'][i]}: {p['lat']:.5f}, {p['lng']:.5f}")
 
-    # Compute route and analyze
-    if len(st.session_state["points"]) == 2 and st.session_state["route_coords"] is None:
+    # ----- 2️⃣ ถ้ามี route แล้ว และผู้ใช้เปลี่ยนวันที่ → re-run analysis -----
+    if st.session_state.get("route_nodes") and st.session_state.get("route_coords"):
         try:
-            with st.spinner(f"Analyzing route for {selected_date}..."):
+            with st.spinner(f"Re-analyzing route for {selected_date}..."):
+                risk_map = load_road_risk_for_date(selected_date)
+                route = st.session_state["route_nodes"]
+                analysis_result = analyze_route_final(G, route, risk_map)
+                analysis_result["target_date"] = selected_date
+                st.session_state["analysis"] = analysis_result
+        except Exception as e:
+            st.error(f"Error re-analyzing: {e}")
+
+    # ----- 3️⃣ เมื่อมี 2 จุดและยังไม่มีเส้นทาง -----
+    if len(st.session_state["points"]) == 2 and st.session_state.get("route_coords") is None:
+        try:
+            with st.spinner(f"Finding route and analyzing for {selected_date}..."):
                 p1, p2 = st.session_state["points"]
                 orig = ox.distance.nearest_nodes(G, p1["lng"], p1["lat"])
                 dest = ox.distance.nearest_nodes(G, p2["lng"], p2["lat"])
 
                 route = ox.shortest_path(G, orig, dest, weight="length")
                 if route is None:
-                    raise RuntimeError("Route not found")
+                    raise Exception("Route not found")
 
                 risk_map = load_road_risk_for_date(selected_date)
                 analysis_result = analyze_route_final(G, route, risk_map)
                 analysis_result["target_date"] = selected_date
 
+                # บันทึก route ทั้ง node และพิกัดไว้ใน session
                 route_gdf = ox.routing.route_to_gdf(G, route)
                 route_coords = []
                 for geom in route_gdf.geometry:
@@ -397,31 +411,34 @@ with col_ctrl:
                             route_coords.extend([(lat, lon) for lon, lat in part.coords])
 
                 st.session_state["route_coords"] = route_coords
+                st.session_state["route_nodes"] = route
                 st.session_state["analysis"] = analysis_result
                 st.rerun()
         except Exception as e:
-            st.error(f"Error: {e}")
+            st.error(f"Error: {str(e)}")
 
-    if st.session_state["analysis"]:
+    # ----- 4️⃣ แสดงผลวิเคราะห์ -----
+    if st.session_state.get("analysis"):
         a = st.session_state["analysis"]
         target_date = a["target_date"]
         st.success(f"Route analysis for {target_date} completed successfully!")
 
-        total_km = a["total_length"] / 1000.0
-        c1, c2 = st.columns(2)
-        with c1:
+        total_km = a['total_length'] / 1000
+        col1, col2 = st.columns(2)
+        with col1:
             st.metric("Total Distance", f"{total_km:.2f} km")
-        with c2:
+        with col2:
             st.metric("Overall Risk", f"{a['total_risk']:.1f}%")
 
         with st.expander("View Highway Usage Details", expanded=False):
             if a["highway_length_by_number"]:
                 st.markdown("### Distance by Highway Number")
                 for road_num, length_m in sorted(a["highway_length_by_number"].items()):
-                    st.write(f"- **Highway No. {road_num}**: {length_m/1000.0:.2f} km")
+                    length_km = length_m / 1000
+                    st.write(f"- **Highway No. {road_num}**: {length_km:.2f} km")
             else:
                 st.write("No numbered highways found in route.")
 
-            local_km = a["local_length"] / 1000.0
+            local_km = a['local_length'] / 1000
             st.write(f"**Local Roads (No Risk Calculation)**: {local_km:.2f} km")
             st.caption("Note: Risk is calculated only from highways with available data.")
