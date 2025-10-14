@@ -7,7 +7,7 @@ import pandas as pd
 import os
 import subprocess
 import logging
-
+from airflow.utils.trigger_rule import TriggerRule
 from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator, ShortCircuitOperator
 from airflow.operators.bash import BashOperator
@@ -318,13 +318,14 @@ with DAG(
         run_last30_weather >> run_usage_current >> run_lstm_model >> run_predict_acc
 
     # ---------- END TASK ----------
-    end_task = DummyOperator(task_id="end_task")
+    end_task = DummyOperator(
+        task_id="end_task",
+        trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS 
+    )
 
     # ---------- DAG FLOW ----------
     start >> t_check_update
-    t_check_update >> clean_pipeline
-    t_check_update >> forecast_pipeline
+    t_check_update >> clean_pipeline >> end_task
+    t_check_update >> forecast_pipeline >> end_task
 
-    # แล้วเชื่อมแต่ละ branch ไปยัง end_task
-    clean_pipeline >> end_task
-    forecast_pipeline >> end_task
+
